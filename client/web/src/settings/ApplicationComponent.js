@@ -101,6 +101,7 @@ export function ApplicationComponent(props) {
         ? LINUX
         : WINDOWS
       : ''
+    const fileSystemType = (os !== LINUX ? FSX : EFS)
     const windowsVersion = os === WINDOWS ? thisService.operatingSystem : ''
     let initialTierValues = {}
     for (var i = 0; i < tiers.length; i++) {
@@ -116,7 +117,7 @@ export function ApplicationComponent(props) {
         mountPoint: thisTier.filesystem?.mountPoint || '',
         // Start off with FSX if Windows and EFS if Linux
         fileSystemType:
-          thisTier.filesystem?.fileSystemType || (os !== LINUX ? FSX : EFS),
+          thisTier.filesystem?.fileSystemType || fileSystemType,
         efs: thisTier.filesystem?.efs || {
           lifecycle: '0',
           encryptAtRest: '',
@@ -164,6 +165,7 @@ export function ApplicationComponent(props) {
       containerTag: thisService?.containerTag || 'latest',
       description: thisService?.description || '',
       operatingSystem: os,
+      filesystem: { fileSystemType: fileSystemType },
       windowsVersion: windowsVersion,
       tiers: initialTierValues,
       tombstone: false,

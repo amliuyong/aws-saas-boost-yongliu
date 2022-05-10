@@ -302,15 +302,18 @@ export const selectConfig = (state) => state.settings.config.data
 
 export const selectServiceToS3BucketMap = (state) => {
   const appConfig = state.settings.config.data
-  const keys = Object.keys(appConfig?.services)
-  return keys.reduce((prev, curr) => {
-    const map = {
-      ...prev,
-      [curr]:
-        appConfig?.services[curr].tiers?.default?.database?.bootstrapFilename,
-    }
-    return map
-  }, {})
+  if (!!appConfig?.services) {
+    const keys = Object.keys(appConfig?.services)
+    return keys.reduce((prev, curr) => {
+      const map = {
+        ...prev,
+        [curr]:
+          appConfig?.services[curr].tiers?.default?.database?.bootstrapFilename,
+      }
+      return map
+    }, {})
+  }
+  return {}
 }
 
 export const { actions, reducer } = settingSlice

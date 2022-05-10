@@ -190,8 +190,9 @@ export function ApplicationContainer(props) {
           }
           cleanedFs = {
             ...cleanedFs,
-            efs: cleanedFs.fileSystemType === EFS ? cleanedFs.efs : null,
-            fsx: cleanedFs.fileSystemType === FSX ? fsx : null,
+            efs: thisService.filesystem?.fileSystemType === EFS ? cleanedFs.efs : null,
+            fsx: thisService.filesystem?.fileSystemType === FSX ? fsx : null,
+            fileSystemType: thisService.filesystem?.fileSystemType,
           }
           const {
             port,

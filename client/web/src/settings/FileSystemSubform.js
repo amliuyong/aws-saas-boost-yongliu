@@ -338,8 +338,7 @@ const FsxFilesystemOptions = (props) => {
           </Row>
         </Col>
       </Row>
-    )) ||
-    null
+    ) || null )
   )
 }
 
