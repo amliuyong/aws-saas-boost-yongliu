@@ -55,7 +55,7 @@ const mapStateToProps = (state, props) => {
     ? {
         ...tenant,
         // What to do about http vs. https here?
-        fullCustomDomainName: `http://${tenant.hostname}`,
+        fullCustomDomainName: tenant.subdomain ? `http://${tenant.subdomain}`: null,
       }
     : undefined
 

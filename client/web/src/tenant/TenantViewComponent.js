@@ -123,7 +123,7 @@ function TenantViewComponent(props) {
 
   return (
     <>
-      <Modal size="lg" fade={true} isOpen={showModal}>
+      <Modal size="lg" fade={true} show={showModal}>
         <Modal.Header className="bg-primary">Confirm Delete</Modal.Header>
         <Modal.Body>
           <p>
