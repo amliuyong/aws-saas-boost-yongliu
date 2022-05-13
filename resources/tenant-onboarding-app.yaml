@@ -75,7 +75,7 @@ Parameters:
     Description: Operating System to use for the Docker host
     Type: String
     # Can't have dashes or underscores in Mappings keys :(
-    AllowedValues: [WIN2019FULL, WIN2019CORE, WIN1909CORE, WIN2016FULL, LINUX]
+    AllowedValues: [WIN2019FULL, WIN2019CORE, WIN2022FULL, WIN2022CORE, WIN20H2CORE, WIN2016FULL, LINUX]
   ClusterInstanceType:
     Description: EC2 instance type to use for non Fargate Docker hosts
     Type: String
@@ -210,15 +210,21 @@ Parameters:
     AllowedValues: [true, false]
     Default: false
   # These params are here to read the image values from the public SSM. Leave the defaults.
+  WIN2022FULL:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Full-ECS_Optimized/image_id
+  WIN2022CORE:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Core-ECS_Optimized/image_id
   WIN2019FULL:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-windows-latest/Windows_Server-2019-English-Full-ECS_Optimized/image_id
   WIN2019CORE:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-windows-latest/Windows_Server-2019-English-Core-ECS_Optimized/image_id
-  WIN1909CORE:
+  WIN20H2CORE:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ami-windows-latest/Windows_Server-1909-English-Core-ECS_Optimized/image_id
+    Default: /aws/service/ami-windows-latest/Windows_Server-20H2-English-Core-ECS_Optimized/image_id
   WIN2016FULL:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-windows-latest/Windows_Server-2016-English-Full-ECS_Optimized/image_id
@@ -250,7 +256,10 @@ Conditions:
     - Condition: WindowsOS
   IsWin2019Full: !Equals [WIN2019FULL, !Ref ContainerOS]
   IsWin2019Core: !Equals [WIN2019CORE, !Ref ContainerOS]
-  IsWin1909Core: !Equals [WIN1909CORE, !Ref ContainerOS]
+  IsWin2022Full: !Equals [WIN2022FULL, !Ref ContainerOS]
+  IsWin2022Core: !Equals [WIN2022CORE, !Ref ContainerOS]
+  IsWin2016Full: !Equals [WIN2016FULL, !Ref ContainerOS]
+  IsWin20H2Core: !Equals [WIN20H2CORE, !Ref ContainerOS]
 Resources:
   CapacityProvider:
     Type: AWS::ECS::CapacityProvider
@@ -755,9 +764,15 @@ Resources:
               - IsWin2019Core
               - !Ref WIN2019CORE
               - !If
-                - IsWin1909Core
-                - !Ref WIN1909CORE
-                - !Ref WIN2016FULL
+                - IsWin2022Full
+                - !Ref WIN2022FULL
+                - !If
+                  - IsWin2022Core
+                  - !Ref WIN2022CORE
+                  - !If
+                    - IsWin20H2Core
+                    - !Ref WIN20H2CORE
+                    - !Ref WIN2016FULL
         InstanceType: !Ref ClusterInstanceType
         IamInstanceProfile:
           Arn: !GetAtt ECSInstanceProfile.Arn

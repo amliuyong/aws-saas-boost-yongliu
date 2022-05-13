@@ -19,10 +19,12 @@ package com.amazon.aws.partners.saasfactory.saasboost.appconfig;
 public enum OperatingSystem {
 
     LINUX("Amazon Linux 2"),
+    WIN_2016_FULL("Windows Server 2016 Full"),
     WIN_2019_FULL("Windows Server 2019 Full"),
     WIN_2019_CORE("Windows Server 2019 Core"),
-    WIN_1909_CORE("Windows Server 1909 Core Semi-Annual"),
-    WIN_2016_FULL("Windows Server 2016 Full");
+    WIN_2022_FULL("Windows Server 2022 Full"),
+    WIN_2022_CORE("Windows Server 2022 Core"),
+    WIN_20H2_CORE("Windows Server 20H2 Core");
 
     private final String description;
 
