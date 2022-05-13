@@ -241,7 +241,7 @@ Resources:
               SSEAlgorithm: AES256
       LoggingConfiguration:
         DestinationBucketName: !Ref Logging
-        LogFilePrefix: web-logs
+        LogFilePrefix: web-logs-
       Tags:
         - Key: SaaS Boost
           Value: !Ref Environment
@@ -322,7 +322,6 @@ Resources:
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*:log-stream:*
               - Effect: Allow
                 Action:
-                  - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:DescribeLogStreams
                 Resource:
@@ -332,34 +331,24 @@ Resources:
                   - s3:ListBucket
                   - s3:ListBucketVersions
                   - s3:GetBucketVersioning
+                # We know all S3 buckets will have auto-generated names that are prefixed with the stack name
+                # Using this wildcard instead of Fn::Ref to the bucket resources avoids circular dependencies
                 Resource:
-                  - !Sub arn:aws:s3:::${AdminWeb}
-                  - !Sub arn:aws:s3:::${Pipelines}
-                  - !Sub arn:aws:s3:::${AthenaOutput}
-                  - !Sub arn:aws:s3:::${AccessLogs}
-                  - !Sub arn:aws:s3:::${Logging}
-                  - !Sub arn:aws:s3:::${Resources}
+                  - !Sub arn:aws:s3:::${AWS::StackName}-*
               - Effect: Allow
                 Action:
                   - s3:DeleteObject
                   - s3:DeleteObjectVersion
                 Resource:
-                  - !Sub arn:aws:s3:::${AdminWeb}/*
-                  - !Sub arn:aws:s3:::${Pipelines}/*
-                  - !Sub arn:aws:s3:::${AthenaOutput}/*
-                  - !Sub arn:aws:s3:::${AccessLogs}/*
-                  - !Sub arn:aws:s3:::${Logging}/*
-                  - !Sub arn:aws:s3:::${Resources}/*
-  #ClearBucketLogs:
-  #  Type: AWS::Logs::LogGroup
-  #  # For testing
-  #  #DeletionPolicy: Retain
-  #  Properties:
-  #    LogGroupName: !Sub /aws/lambda/sb-${Environment}-clear-bucket
-  #    RetentionInDays: 30
+                  - !Sub arn:aws:s3:::${AWS::StackName}-*/*
+  ClearBucketLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/sb-${Environment}-clear-bucket
+      RetentionInDays: 30
   ClearBucket:
     Type: AWS::Lambda::Function
-    #DependsOn: ClearBucketLogs
+    DependsOn: ClearBucketLogs
     Properties:
       FunctionName: !Sub sb-${Environment}-clear-bucket
       Role: !GetAtt ClearBucketExecutionRole.Arn
@@ -377,41 +366,30 @@ Resources:
         Variables:
           JAVA_TOOL_OPTIONS: '-XX:+TieredCompilation -XX:TieredStopAtLevel=1'
       Tags:
-        - Key: "Application"
-          Value: "SaaSBoost"
-        - Key: "Environment"
+        - Key: Application
+          Value: SaaSBoost
+        - Key: Environment
           Value: !Ref Environment
-        - Key: "BoostService"
-          Value: "Logs"
   InvokeClearCodePipelineBucket:
     Type: Custom::CustomResource
-    DependsOn:
-      - InvokeClearLoggingBucket
     Properties:
       ServiceToken: !GetAtt ClearBucket.Arn
       Bucket: !Ref Pipelines
   InvokeClearAthenaBucket:
     Type: Custom::CustomResource
-    DependsOn:
-      - InvokeClearLoggingBucket
     Properties:
       ServiceToken: !GetAtt ClearBucket.Arn
       Bucket: !Ref AthenaOutput
   InvokeClearAccessLogsBucket:
     Type: Custom::CustomResource
-    DependsOn:
-      - InvokeClearLoggingBucket
     Properties:
       ServiceToken: !GetAtt ClearBucket.Arn
       Bucket: !Ref AccessLogs
   InvokeClearWebsiteBucket:
     Type: Custom::CustomResource
-    DependsOn:
-      - InvokeClearLoggingBucket
     Properties:
       ServiceToken: !GetAtt ClearBucket.Arn
       Bucket: !Ref AdminWeb
-  # TODO: Do we want to clear the access logs bucket?
   InvokeClearLoggingBucket:
     Type: Custom::CustomResource
     Properties:
@@ -477,12 +455,10 @@ Resources:
         Variables:
           JAVA_TOOL_OPTIONS: '-XX:+TieredCompilation -XX:TieredStopAtLevel=1'
       Tags:
-        - Key: "Application"
-          Value: "SaaSBoost"
-        - Key: "Environment"
+        - Key: Application
+          Value: SaaSBoost
+        - Key: Environment
           Value: !Ref Environment
-        - Key: "BoostService"
-          Value: "Macro"
   ApplicationServicesMacro:
     Type: AWS::CloudFormation::Macro
     Properties:
@@ -572,9 +548,9 @@ Resources:
           SAAS_BOOST_EVENT_BUS: !Ref SaaSBoostEventBus
           JAVA_TOOL_OPTIONS: '-XX:+TieredCompilation -XX:TieredStopAtLevel=1'
       Tags:
-        - Key: "Application"
-          Value: "SaaSBoost"
-        - Key: "Environment"
+        - Key: Application
+          Value: SaaSBoost
+        - Key: Environment
           Value: !Ref Environment
   CoreStackListenerTopic:
     Type: AWS::SNS::Topic
@@ -600,13 +576,10 @@ Resources:
     Properties:
       TemplateURL: !Sub https://${SaaSBoostBucket}.s3.amazonaws.com/saas-boost-network.yaml
       Parameters:
-        SaaSBoostBucket: !Ref SaaSBoostBucket
-        LambdaSourceFolder: !Ref LambdaSourceFolder
         Environment: !Ref Environment
   ad:
     Type: AWS::CloudFormation::Stack
     Condition: ProvisionManagedAD
-    DependsOn: network
     Properties:
       TemplateURL: !Sub https://${SaaSBoostBucket}.s3.amazonaws.com/saas-boost-managed-ad.yaml
       Parameters:
@@ -620,8 +593,10 @@ Resources:
         ADPasswordParam: !Ref ADPasswordParam
   web:
     Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - network
+    # Make sure we delete the web stack before clearing out the logging bucket or new logs
+    # from S3 website hosting may be generated between clearing the bucket and trying to
+    # delete the bucket
+    DependsOn: InvokeClearLoggingBucket
     Properties:
       TemplateURL: !Sub https://${SaaSBoostBucket}.s3.amazonaws.com/saas-boost-web.yaml
       Parameters:
@@ -632,7 +607,6 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn:
       - network
-      - InvokeClearLoggingBucket
       - ApplicationServicesMacro
     Properties:
       TemplateURL: !Sub https://${SaaSBoostBucket}.s3.amazonaws.com/saas-boost-core.yaml
@@ -757,6 +731,7 @@ Resources:
         SaaSBoostBucket: !Ref SaaSBoostBucket
         LambdaSourceFolder: !Ref LambdaSourceFolder
         SaaSBoostUtilsLayer: !Ref SaaSBoostUtilsLayer
+        SaaSBoostEventBus: !Ref SaaSBoostEventBus
   user:
     Type: AWS::CloudFormation::Stack
     DependsOn:

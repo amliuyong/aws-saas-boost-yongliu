@@ -15,12 +15,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWS SaaS Boost Network
 Parameters:
-  SaaSBoostBucket:
-    Description: SaaS Boost assets S3 bucket
-    Type: String
-  LambdaSourceFolder:
-    Description: Folder for lambda source code to change on each deployment
-    Type: String
   Environment:
     Description: SaaS Boost "environment" such as test, prod, beta, etc...
     Type: String

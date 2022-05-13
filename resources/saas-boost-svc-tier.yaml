@@ -27,6 +27,9 @@ Parameters:
   SaaSBoostUtilsLayer:
     Description: Utils Layer ARN
     Type: String
+  SaaSBoostEventBus:
+    Description: SaaS Boost Eventbridge Bus
+    Type: String
 Resources:
   TiersTable:
     Type: AWS::DynamoDB::Table
