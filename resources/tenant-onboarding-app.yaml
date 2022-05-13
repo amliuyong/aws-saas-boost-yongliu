@@ -918,10 +918,10 @@ Resources:
     Properties:
       HealthCheckProtocol: HTTP
       HealthCheckPath: !Ref ContainerHealthCheckPath
-      HealthCheckIntervalSeconds: 10
-      HealthCheckTimeoutSeconds: 5
+      HealthCheckIntervalSeconds: 15
+      HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 2
+      UnhealthyThresholdCount: 5
       Port: !Ref ContainerPort
       Protocol: HTTP
       TargetType: !If [WindowsOS, instance, ip]
@@ -1013,6 +1013,7 @@ Resources:
       ServiceName: !Ref ServiceResourceName
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSTaskDefinition
+      PropagateTags: TASK_DEFINITION
       LaunchType: !If [FargateLaunchType, !Ref TaskLaunchType, !Ref 'AWS::NoValue']
       # Initially set DesiredCount to zero so the resource stabilizes on create stack. CodePipeline will update it when deploying the task.
       DesiredCount: 0
