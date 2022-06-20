@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Suspense } from 'react';
+import { Suspense } from 'react'
 
-import {AuthContextProvider} from './components/Auth/authing/context/AuthContext'
+import { AuthContextProvider } from './components/Auth/authing/context/AuthContext'
 import AppWithAuthing from './components/Auth/authing/AppWithAuthing'
 
 const loading = () => (
@@ -26,11 +26,10 @@ const loading = () => (
 )
 
 function AppWithContext() {
-
-  return ( 
-    <Suspense fallback={loading()}>  
-      <AuthContextProvider idp='authing'>
-        <AppWithAuthing/>
+  return (
+    <Suspense fallback={loading()}>
+      <AuthContextProvider idp="authing">
+        <AppWithAuthing />
       </AuthContextProvider>
     </Suspense>
   )

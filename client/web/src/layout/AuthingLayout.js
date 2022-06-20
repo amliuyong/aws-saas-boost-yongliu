@@ -18,12 +18,17 @@
 import React, { Component, Suspense } from 'react'
 import { withRouter } from 'react-router-dom'
 import * as router from 'react-router-dom'
-import { AppContent, AppSidebar, AppFooter, AppHeader } from '../components/index'
+import {
+  AppContent,
+  AppSidebar,
+  AppFooter,
+  AppHeader,
+} from '../components/index'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 // sidebar nav config
 import navigation from '../_nav'
-import {logout} from '../components/Auth/authing/config'
+import { logout } from '../components/Auth/authing/config'
 
 const mapStateToProps = (state) => {
   return { settings: state.settings, setup: state.settings.setup }
@@ -31,32 +36,34 @@ const mapStateToProps = (state) => {
 
 class AuthingLayout extends Component {
   constructor(props) {
-    super(props)   
+    super(props)
     this.state = {
-      user: null
+      user: null,
     }
-    console.log("AuthingLayout.props:", props);
+    console.log('AuthingLayout.props:', props)
     this.handleSignOut = this.handleSignOut.bind(this)
   }
 
   async componentDidMount() {
-     this.setState((state) => {
+    this.setState((state) => {
       return {
-          ... state,
-          user: JSON.parse(localStorage.getItem('userInfo'))
+        ...state,
+        user: JSON.parse(localStorage.getItem('userInfo')),
       }
-     })
+    })
   }
 
   handleSignOut = async () => {
-   console.log("call handleSignOut() ...")
-   logout();
+    console.log('call handleSignOut() ...')
+    logout()
   }
 
-  loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
+  loading = () => (
+    <div className="animated fadeIn pt-1 text-center">Loading...</div>
+  )
 
   render() {
-    const { user } = this.state;
+    const { user } = this.state
     const { setup } = this.props
     if (!setup) {
       navigation.forEach((nav) => {

@@ -15,32 +15,26 @@
  */
 
 import App from './../../../App'
-import {
-  BrowserRouter,
-  Route,
-  Switch,
-  Redirect,
-} from "react-router-dom";
-import { useAuthContext } from './useAuthContext';
-import { AuthingSignIn } from './AuthingSigIn';
-import { AuthingHandleCallback } from './AuthingHandleCallback';
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
+import { useAuthContext } from './useAuthContext'
+import { AuthingSignIn } from './AuthingSigIn'
+import { AuthingHandleCallback } from './AuthingHandleCallback'
 
-
- function AppWithAuthing() {
+function AppWithAuthing() {
   const { user } = useAuthContext()
 
-  return ( 
+  return (
     <BrowserRouter>
       <Switch>
         <Route path="/login" exact={true}>
-          <AuthingSignIn/>
+          <AuthingSignIn />
         </Route>
         <Route path="/callback" exact={true}>
-          <AuthingHandleCallback/>
+          <AuthingHandleCallback />
         </Route>
-        <Route path="/" >
-           {user && <App /> } 
-           {!user && <Redirect to='/login'/>}
+        <Route path="/">
+          {user && <App />}
+          {!user && <Redirect to="/login" />}
         </Route>
       </Switch>
     </BrowserRouter>
