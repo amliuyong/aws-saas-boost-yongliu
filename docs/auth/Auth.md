@@ -181,6 +181,8 @@ http://localhost:4000/callback?code=YfIAFpv4J2I2s2-zTC-Wuo-YeHkSK_7cVgehpHXIlur&
 
 7. POST https://authing-test-liuyong.authing.cn/oidc/token
 
+content-type: application/x-www-form-urlencoded
+
 ```
 client_id: 62a8392bb610e1da3f7aeefb
 grant_type: authorization_code
@@ -245,5 +247,80 @@ Header:
 
 ```
 Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtvMkhCalVTNko3bWFKcVJ2eTZyd1Y5ZWJQVUE2U1EwdFlwdmtCcnl2MWcifQ.eyJqdGkiOiJmVG1pZ0l2QTBLUGxfNXpOSUlBYlkiLCJzdWIiOiI2MmE4MzFiOTA2OTY2ZDc0N2M0Mzg2MzgiLCJpYXQiOjE2NTUyNjM4MzAsImV4cCI6MTY1NjQ3MzQzMCwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSBwaG9uZSBhZGRyZXNzIiwiaXNzIjoiaHR0cHM6Ly9hdXRoaW5nLXRlc3QtbGl1eW9uZy5hdXRoaW5nLmNuL29pZGMiLCJhdWQiOiI2MmE4MzkyYmI2MTBlMWRhM2Y3YWVlZmIifQ.Ro6UBBcqTOYpy0koEfzS69fgpHslmqCBz3HCwHvPUWuPLbbcQ91RBHbHFtQxcLysseJx8b6Q9hEmFf5VIgRJNMawWmEl7LnxtafFEmHexJkCiN_nONkMVGpowMbYYZf5teJIg3a4pVkCVxzlzroupYWL22Ipqno9eSPWevGoxHujyD6yUguciPR-ah7BcrD7eJwepfueGegnMp63Gz1ynNPSX83a1_Qn6pqP4ykZfFaYTKpliuVjwKLpnrnVws3oP2ylMRiRrLrwOYnUl6RORUgZUV8n3M6Us9nX7XIB7JqrAF0R2GzH0cd4cd4LQ3eXqhAC8JXj3nZR-IxNEu8Gpw
+
+```
+
+
+## Auth0
+
+1. GET https://dev-0gi5y814.us.auth0.com/authorize?client_id=TJi2D9dOce1bRr49L3lraZ2myPhjyQsk&redirect_uri=http://localhost:3000&dispatchConfig=[object Object]&_targetInst=[object Object]&_dispatchListeners=function (opts) {
+    return client.loginWithRedirect(toAuth0LoginRedirectOptions(opts));
+  }&_dispatchInstances=[object Object]&nativeEvent=[object PointerEvent]&type=click&target=[object HTMLButtonElement]&currentTarget=[object HTMLButtonElement]&eventPhase=3&bubbles=true&cancelable=true&timeStamp=16468.80000000447&defaultPrevented=false&isTrusted=true&view=[object Window]&detail=1&screenX=1036&screenY=690&clientX=718&clientY=469&pageX=718&pageY=469&ctrlKey=false&shiftKey=false&altKey=false&metaKey=false&getModifierState=function modifierStateGetter(keyArg) {
+      var syntheticEvent = this;
+      var nativeEvent = syntheticEvent.nativeEvent;
+
+      if (nativeEvent.getModifierState) {
+        return nativeEvent.getModifierState(keyArg);
+      }
+
+      var keyProp = modifierKeyToProp[keyArg];
+      return keyProp ? !!nativeEvent[keyProp] : false;
+    }&button=0&buttons=0&relatedTarget=null&movementX=0&movementY=0&isDefaultPrevented=function functionThatReturnsFalse() {
+      return false;
+    }&isPropagationStopped=function functionThatReturnsFalse() {
+      return false;
+    }&scope=openid profile email&response_type=code&response_mode=query&state=M3JjMGtPaWwyQzNBMDF5TWZuZ09uMDVyWTJVblJCTEs2TFZ4NktiTFN5Lg==&nonce=bEZkR0RpYWdoVUxjSnFVT2FVdFNZa2pNeXVwZFZoaFE4Yy1vOTRjZ2NLfg==&code_challenge=-7eaPVBYMrEvuzI2H-nqrUpNZ89v2_IWhBiuXrGNc9A&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xMC4xIn0=
+
+
+Response 302
+
+2. GET https://dev-0gi5y814.us.auth0.com/login?state=hKFo2SBTaEVQSGJ2WTQyT0d3TjBxNGNDTEdJREJULWtqWlpKR6FupWxvZ2luo3RpZNkgN2dZWmdzb1J1cVFmdWp2RW9KcGtBZWx0d1JjMFpHZTKjY2lk2SBUSmkyRDlkT2NlMWJScjQ5TDNscmFaMm15UGhqeVFzaw&client=TJi2D9dOce1bRr49L3lraZ2myPhjyQsk&protocol=oauth2&redirect_uri=http://localhost:3000&dispatchConfig=[object Object]&_targetInst=[object Object]&_dispatchListeners=function (opts) {
+    return client.loginWithRedirect(toAuth0LoginRedirectOptions(opts));
+  }&_dispatchInstances=[object Object]&nativeEvent=[object PointerEvent]&type=click&target=[object HTMLButtonElement]&currentTarget=[object HTMLButtonElement]&eventPhase=3&bubbles=true&cancelable=true&timeStamp=16468.80000000447&defaultPrevented=false&isTrusted=true&view=[object Window]&detail=1&screenX=1036&screenY=690&clientX=718&clientY=469&pageX=718&pageY=469&ctrlKey=false&shiftKey=false&altKey=false&metaKey=false&getModifierState=function modifierStateGetter(keyArg) {
+      var syntheticEvent = this;
+      var nativeEvent = syntheticEvent.nativeEvent;
+
+      if (nativeEvent.getModifierState) {
+        return nativeEvent.getModifierState(keyArg);
+      }
+
+      var keyProp = modifierKeyToProp[keyArg];
+      return keyProp ? !!nativeEvent[keyProp] : false;
+    }&button=0&buttons=0&relatedTarget=null&movementX=0&movementY=0&isDefaultPrevented=function functionThatReturnsFalse() {
+      return false;
+    }&isPropagationStopped=function functionThatReturnsFalse() {
+      return false;
+    }&scope=openid profile email&response_type=code&response_mode=query&nonce=bEZkR0RpYWdoVUxjSnFVT2FVdFNZa2pNeXVwZFZoaFE4Yy1vOTRjZ2NLfg==&code_challenge=-7eaPVBYMrEvuzI2H-nqrUpNZ89v2_IWhBiuXrGNc9A&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xMC4xIn0=
+  
+  
+Response --> login page
+
+
+3. POST https://dev-0gi5y814.us.auth0.com/usernamepassword/challenge
+
+```json
+
+{"state":"hKFo2SBTaEVQSGJ2WTQyT0d3TjBxNGNDTEdJREJULWtqWlpKR6FupWxvZ2luo3RpZNkgN2dZWmdzb1J1cVFmdWp2RW9KcGtBZWx0d1JjMFpHZTKjY2lk2SBUSmkyRDlkT2NlMWJScjQ5TDNscmFaMm15UGhqeVFzaw"}
+
+```
+
+4. POST Login
+
+
+5. GET https://dev-0gi5y814.us.auth0.com/authorize/resume?state=7gYZgsoRuqQfujvEoJpkAeltwRc0ZGe2
+
+Response 302
+
+6. GET http://localhost:3000/?code=DdzcZlWT5NpmkdjkzA1mQAR903fiCbrUxTUp0qi6wPCIA&state=M3JjMGtPaWwyQzNBMDF5TWZuZ09uMDVyWTJVblJCTEs2TFZ4NktiTFN5Lg==
+
+7. POST https://dev-0gi5y814.us.auth0.com/oauth/token
+
+```json
+{
+"client_id":"TJi2D9dOce1bRr49L3lraZ2myPhjyQsk","code_verifier":"Dm1Xi4wxO9RWBaAHji4nSeCio7xm0rLo1_pE_xaBwd2",
+"grant_type":"authorization_code",
+"code":"DdzcZlWT5NpmkdjkzA1mQAR903fiCbrUxTUp0qi6wPCIA",
+"redirect_uri":"http://localhost:3000"
+}
 
 ```

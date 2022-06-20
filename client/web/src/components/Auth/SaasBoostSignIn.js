@@ -79,9 +79,12 @@ export default class SaasBoostSignIn extends SaasBoostAuthComponent {
     this.signIn = this.signIn.bind(this)
     this.showMessage = this.showMessage.bind(this)
     this.showSignOutReason = this.showSignOutReason.bind(this)
+
+    console.log("SaasBoostSignIn.props", props)
   }
 
   async signIn(values, { resetForm }) {
+    console.log("signIn()", values)
     const { dismissSignOutReason } = this.props
     this.dismiss() //clear any existing errors
 
@@ -96,9 +99,11 @@ export default class SaasBoostSignIn extends SaasBoostAuthComponent {
     resetForm({ values }) // clear form validation, but leave values.
     try {
       const user = await Auth.signIn(username.trim(), password.trim())
+      console.log("Auth.signIn user", user)
       if (user.challengeName === 'NEW_PASSWORD_REQUIRED') {
         this.changeState('requireNewPassword', user)
       } else {
+        console.log("call checkContact()")
         this.checkContact(user)
       }
     } catch (err) {

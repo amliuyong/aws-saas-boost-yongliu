@@ -29,30 +29,29 @@ import ScrollToTop from './utils/ScrollToTop'
 //)
 
 // Containers
-const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
+//const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
+const AuthingLayout = React.lazy(() => import('./layout/AuthingLayout'))
 
 App.propTypes = {
   authState: PropTypes.string,
 }
 
 function App(props) {
-  if (props.authState === 'signedIn') {
+  console.log("App.props", props)
     return (
       <Provider store={store}>
         <BrowserRouter>
           <ScrollToTop>
             <FetchSettings>
               <Switch>
-                <Route path="/" name="Home" render={(props) => <DefaultLayout {...props} />} />
+                <Route path="/" name="Home" render={(props) => <AuthingLayout {...props} />} />
               </Switch>
             </FetchSettings>
           </ScrollToTop>
         </BrowserRouter>
       </Provider>
     )
-  } else {
-    return null
-  }
+
 }
 
 export default App

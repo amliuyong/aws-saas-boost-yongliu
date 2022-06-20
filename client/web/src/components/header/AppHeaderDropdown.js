@@ -26,8 +26,12 @@ import {
 } from '@coreui/react'
 import { cilLockLocked, cilSettings, cilShieldAlt, cilUser } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
+import { useAuthContext } from '../Auth/authing/useAuthContext'
 
 const AppHeaderDropdown = (props) => {
+ const {idp} = useAuthContext();
+ const is3rdPartIdp = idp === 'authing';
+
   const { handleProfileClick, handleChangePasswordClick, onLogout, user } = props
   return (
     <CDropdown variant="nav-item">
@@ -40,12 +44,15 @@ const AppHeaderDropdown = (props) => {
         <CDropdownHeader className="bg-light fw-semibold py-2">
           <CIcon icon={cilSettings} className="me-2" /> Settings
         </CDropdownHeader>
-        <CDropdownItem href="#" onClick={() => handleProfileClick()}>
+        {!is3rdPartIdp && <CDropdownItem href="#" onClick={() => handleProfileClick()}>
           <CIcon icon={cilUser} className="me-2" /> Profile
         </CDropdownItem>
-        <CDropdownItem href="#" onClick={() => handleChangePasswordClick()}>
+        }
+        {!is3rdPartIdp && <CDropdownItem href="#" onClick={() => handleChangePasswordClick()}>
           <CIcon icon={cilShieldAlt} className="me-2" /> Change Password
         </CDropdownItem>
+        }
+
         <CDropdownItem href="#" onClick={() => onLogout()}>
           <CIcon icon={cilLockLocked} className="me-2" /> Sign Out
         </CDropdownItem>

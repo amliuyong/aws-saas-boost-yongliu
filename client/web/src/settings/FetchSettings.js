@@ -34,6 +34,7 @@ FetchSettings.propTypes = {
 }
 
 function FetchSettings(props) {
+  console.log("FetchSettings.props", props)
   const dispatch = useDispatch()
   const settings = useSelector(selectAllSettings)
   const loading = useSelector(selectLoading)
@@ -115,6 +116,15 @@ function FetchSettings(props) {
       dispatch(dismissError())
     }
   }, [dispatch])
+
+  if ( isSettingsLoaded && isOptionsLoaded && isTiersLoaded && isAppConfigLoaded) {
+    console.log("all settings loaded")
+  }else {
+    console.log("isSettingsLoaded", isSettingsLoaded)
+    console.log("isOptionsLoaded", isOptionsLoaded)
+    console.log("isTiersLoaded", isTiersLoaded)
+    console.log("isAppConfigLoaded", isAppConfigLoaded)
+  }
 
   return isSettingsLoaded && isOptionsLoaded && isTiersLoaded && isAppConfigLoaded ? props.children : <SBLoading />
 }

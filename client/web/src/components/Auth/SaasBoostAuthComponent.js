@@ -52,15 +52,26 @@ export class SaasBoostAuthComponent extends Component {
   }
 
   triggerAuthEvent(event) {
+    console.log("triggerAuthEvent()", event)
     const state = this.props.authState
+    console.log("authState", state)
+
     if (this.props.onAuthEvent) {
+      console.log("call onAuthEvent()", state, event)
       this.props.onAuthEvent(state, event, false)
+    }else {
+      console.log("no method props.onAuthEvent")
     }
   }
 
   changeState(state, data) {
+    console.log("===> changeState()", state,  data)
+    console.log("===> changeState()", typeof(this.props.onStateChange))
     if (this.props.onStateChange) {
+      console.log("call props.onStateChange()")
       this.props.onStateChange(state, data)
+    }else {
+      console.log("no method props.onStateChange")
     }
 
     this.triggerAuthEvent({
@@ -137,7 +148,7 @@ export class SaasBoostAuthComponent extends Component {
       throw new Error('No Auth module found, please ensure @aws-amplify/auth is imported')
     }
     Auth.verifiedContact(user).then((data) => {
-      console.log(data)
+      console.log("in checkContact()", data)
       if (!isEmpty(data.verified)) {
         this.changeState('signedIn', user)
       } else {
@@ -162,7 +173,7 @@ export class SaasBoostAuthComponent extends Component {
 SaasBoostAuthComponent.propTypes = {
   authState: PropTypes.string,
   onAuthEvent: PropTypes.func,
-  onStateChange: PropTypes.func,
+ // onStateChange: PropTypes.func,
   usernameAttributes: PropTypes.object,
 }
 

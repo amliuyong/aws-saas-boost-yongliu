@@ -47,7 +47,7 @@ export const handleErrorNoResponse = (response) => {
   }
 }
 
-export async function fetchAccessToken() {
+export async function fetchAccessToken_() {
   try {
     const authSession = await Auth.currentSession()
     const accessToken = authSession.getAccessToken()
@@ -57,6 +57,16 @@ export async function fetchAccessToken() {
     console.error('User session expired, need to log in.')
   }
 }
+
+export async function fetchAccessToken() {
+  try {
+    return 'Test AccessToken'
+  } catch (e) {
+    console.error(e)
+    console.error('User session expired, need to log in.')
+  }
+}
+
 
 //API Aborted class
 export class Aborted extends Error {

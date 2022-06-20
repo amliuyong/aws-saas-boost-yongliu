@@ -13,17 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import 'react-app-polyfill/stable'
-import 'core-js'
-import React from 'react'
-import ReactDOM from 'react-dom'
-import AppWithContext from './AppWithContext'
-import * as serviceWorker from './serviceWorker'
-//import App from "./App";
 
-ReactDOM.render(<AppWithContext />, document.getElementById('root'))
+import { Suspense } from 'react';
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-serviceWorker.unregister()
+import {AuthContextProvider} from './components/Auth/authing/context/AuthContext'
+import AppWithAuthing from './components/Auth/authing/AppWithAuthing'
+
+const loading = () => (
+  <div className="pt-3 text-center">
+    <div className="sk-spinner sk-spinner-pulse">Loading...</div>
+  </div>
+)
+
+function AppWithContext() {
+
+  return ( 
+    <Suspense fallback={loading()}>  
+      <AuthContextProvider idp='authing'>
+        <AppWithAuthing/>
+      </AuthContextProvider>
+    </Suspense>
+  )
+}
+
+export default AppWithContext
