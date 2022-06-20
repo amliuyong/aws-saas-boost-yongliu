@@ -23,7 +23,7 @@ export function AuthingHandleCallback() {
         localStorage.setItem('idToken', id_token);
         localStorage.setItem('userInfo', JSON.stringify(userInfo));
         console.log("saved token to localStorage");
-        dispatch({type: 'LOGIN', userInfo})
+        dispatch({type: 'LOGIN', payload: userInfo})
         history.push('/');
         
       })()

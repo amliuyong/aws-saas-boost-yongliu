@@ -24,6 +24,7 @@ import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
 
 const AppHeader = (props) => {
+  console.log('AppHeader.props', props)
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
   const { handleProfileClick, handleChangePasswordClick, onLogout, user, router } = props
@@ -39,6 +40,7 @@ const AppHeader = (props) => {
             onLogout={onLogout}
           />
         </CHeaderNav>
+        { user && user.name && <span>{user.name}</span> }
       </CContainer>
       <CHeaderDivider />
       <CContainer fluid>

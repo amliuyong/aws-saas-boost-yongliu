@@ -56,7 +56,7 @@ class AuthingLayout extends Component {
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
 
   render() {
-    const { user } = this.setState;
+    const { user } = this.state;
     const { setup } = this.props
     if (!setup) {
       navigation.forEach((nav) => {
@@ -73,9 +73,14 @@ class AuthingLayout extends Component {
         }
       })
     }
+
+    const pageNav = navigation.filter((nav) => {
+      return nav.name != 'Users'
+    })
+
     return (
       <div>
-        <AppSidebar navigation={navigation} />
+        <AppSidebar navigation={pageNav} />
         <div className="wrapper d-flex flex-column min-vw-100 min-vh-100 bg-light">
           <Suspense fallback={this.loading()}>
             <AppHeader

@@ -32,15 +32,15 @@ import { AuthingHandleCallback } from './AuthingHandleCallback';
   return ( 
     <BrowserRouter>
       <Switch>
-        <Route path="/" exact={true}>
-           {user && <App /> } 
-           {!user && <Redirect to='/login'/>}
-        </Route>
         <Route path="/login" exact={true}>
           <AuthingSignIn/>
         </Route>
         <Route path="/callback" exact={true}>
           <AuthingHandleCallback/>
+        </Route>
+        <Route path="/" >
+           {user && <App /> } 
+           {!user && <Redirect to='/login'/>}
         </Route>
       </Switch>
     </BrowserRouter>
