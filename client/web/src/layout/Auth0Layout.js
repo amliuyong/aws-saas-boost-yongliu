@@ -28,7 +28,6 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 // sidebar nav config
 import navigation from '../_nav'
-import { logout } from '../components/Auth/authing/config'
 
 const mapStateToProps = (state) => {
   return { settings: state.settings, setup: state.settings.setup }
