@@ -253,67 +253,29 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtvMkhCalVTNk
 
 ## Auth0
 
-1. GET https://dev-0gi5y814.us.auth0.com/authorize?client_id=TJi2D9dOce1bRr49L3lraZ2myPhjyQsk&redirect_uri=http://localhost:3000&dispatchConfig=[object Object]&_targetInst=[object Object]&_dispatchListeners=function (opts) {
-    return client.loginWithRedirect(toAuth0LoginRedirectOptions(opts));
-  }&_dispatchInstances=[object Object]&nativeEvent=[object PointerEvent]&type=click&target=[object HTMLButtonElement]&currentTarget=[object HTMLButtonElement]&eventPhase=3&bubbles=true&cancelable=true&timeStamp=16468.80000000447&defaultPrevented=false&isTrusted=true&view=[object Window]&detail=1&screenX=1036&screenY=690&clientX=718&clientY=469&pageX=718&pageY=469&ctrlKey=false&shiftKey=false&altKey=false&metaKey=false&getModifierState=function modifierStateGetter(keyArg) {
-      var syntheticEvent = this;
-      var nativeEvent = syntheticEvent.nativeEvent;
-
-      if (nativeEvent.getModifierState) {
-        return nativeEvent.getModifierState(keyArg);
-      }
-
-      var keyProp = modifierKeyToProp[keyArg];
-      return keyProp ? !!nativeEvent[keyProp] : false;
-    }&button=0&buttons=0&relatedTarget=null&movementX=0&movementY=0&isDefaultPrevented=function functionThatReturnsFalse() {
-      return false;
-    }&isPropagationStopped=function functionThatReturnsFalse() {
-      return false;
-    }&scope=openid profile email&response_type=code&response_mode=query&state=M3JjMGtPaWwyQzNBMDF5TWZuZ09uMDVyWTJVblJCTEs2TFZ4NktiTFN5Lg==&nonce=bEZkR0RpYWdoVUxjSnFVT2FVdFNZa2pNeXVwZFZoaFE4Yy1vOTRjZ2NLfg==&code_challenge=-7eaPVBYMrEvuzI2H-nqrUpNZ89v2_IWhBiuXrGNc9A&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xMC4xIn0=
+1. GET https://dev-0gi5y814.us.auth0.com/authorize?client_id=RlbKJBuUxV3yuG00G05DWCqb6eMlFoiS&redirect_uri=http://localhost:3000&scope=openid profile email&response_type=code&response_mode=query&state=QnVWZUxWbmtvLTMwb35PMXNTWi1ZdmZBbzFBZy5nNTNfa242UXNzTXhyeQ==&nonce=UHo2WWNNLjZuS2RwODhkTERaX2dvUU9ScElIYlZTOEQxU0hpMGtEOXBrUg==&code_challenge=DvPSTSGBSeUYbBdI0cAoTOdknJyBe5MmN8HHpq83fj8&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xMC4xIn0=
 
 
 Response 302
 
-2. GET https://dev-0gi5y814.us.auth0.com/login?state=hKFo2SBTaEVQSGJ2WTQyT0d3TjBxNGNDTEdJREJULWtqWlpKR6FupWxvZ2luo3RpZNkgN2dZWmdzb1J1cVFmdWp2RW9KcGtBZWx0d1JjMFpHZTKjY2lk2SBUSmkyRDlkT2NlMWJScjQ5TDNscmFaMm15UGhqeVFzaw&client=TJi2D9dOce1bRr49L3lraZ2myPhjyQsk&protocol=oauth2&redirect_uri=http://localhost:3000&dispatchConfig=[object Object]&_targetInst=[object Object]&_dispatchListeners=function (opts) {
-    return client.loginWithRedirect(toAuth0LoginRedirectOptions(opts));
-  }&_dispatchInstances=[object Object]&nativeEvent=[object PointerEvent]&type=click&target=[object HTMLButtonElement]&currentTarget=[object HTMLButtonElement]&eventPhase=3&bubbles=true&cancelable=true&timeStamp=16468.80000000447&defaultPrevented=false&isTrusted=true&view=[object Window]&detail=1&screenX=1036&screenY=690&clientX=718&clientY=469&pageX=718&pageY=469&ctrlKey=false&shiftKey=false&altKey=false&metaKey=false&getModifierState=function modifierStateGetter(keyArg) {
-      var syntheticEvent = this;
-      var nativeEvent = syntheticEvent.nativeEvent;
-
-      if (nativeEvent.getModifierState) {
-        return nativeEvent.getModifierState(keyArg);
-      }
-
-      var keyProp = modifierKeyToProp[keyArg];
-      return keyProp ? !!nativeEvent[keyProp] : false;
-    }&button=0&buttons=0&relatedTarget=null&movementX=0&movementY=0&isDefaultPrevented=function functionThatReturnsFalse() {
-      return false;
-    }&isPropagationStopped=function functionThatReturnsFalse() {
-      return false;
-    }&scope=openid profile email&response_type=code&response_mode=query&nonce=bEZkR0RpYWdoVUxjSnFVT2FVdFNZa2pNeXVwZFZoaFE4Yy1vOTRjZ2NLfg==&code_challenge=-7eaPVBYMrEvuzI2H-nqrUpNZ89v2_IWhBiuXrGNc9A&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xMC4xIn0=
-  
+2. GET https://dev-0gi5y814.us.auth0.com/login?state=hKFo2SBnSlVKbUVKZjh2ZW1valJTOUVfVkZTQXJWWjM2Z3ZlQqFupWxvZ2luo3RpZNkgMHZXbzl3dUF0Vk55ZUp1T29pUDlzZ2FBN1gwYTJQWEejY2lk2SBSbGJLSkJ1VXhWM3l1RzAwRzA1RFdDcWI2ZU1sRm9pUw&client=RlbKJBuUxV3yuG00G05DWCqb6eMlFoiS&protocol=oauth2&redirect_uri=http://localhost:3000&scope=openid profile email&response_type=code&response_mode=query&nonce=UHo2WWNNLjZuS2RwODhkTERaX2dvUU9ScElIYlZTOEQxU0hpMGtEOXBrUg==&code_challenge=DvPSTSGBSeUYbBdI0cAoTOdknJyBe5MmN8HHpq83fj8&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xMC4xIn0=
   
 Response --> login page
 
 
-3. POST https://dev-0gi5y814.us.auth0.com/usernamepassword/challenge
+3. POST https://dev-0gi5y814.us.auth0.com/usernamepassword/login
 
 ```json
 
-{"state":"hKFo2SBTaEVQSGJ2WTQyT0d3TjBxNGNDTEdJREJULWtqWlpKR6FupWxvZ2luo3RpZNkgN2dZWmdzb1J1cVFmdWp2RW9KcGtBZWx0d1JjMFpHZTKjY2lk2SBUSmkyRDlkT2NlMWJScjQ5TDNscmFaMm15UGhqeVFzaw"}
+{"client_id":"RlbKJBuUxV3yuG00G05DWCqb6eMlFoiS","redirect_uri":"http://localhost:3000","tenant":"dev-0gi5y814","response_type":"code","scope":"openid profile email","state":"hKFo2SBnSlVKbUVKZjh2ZW1valJTOUVfVkZTQXJWWjM2Z3ZlQqFupWxvZ2luo3RpZNkgMHZXbzl3dUF0Vk55ZUp1T29pUDlzZ2FBN1gwYTJQWEejY2lk2SBSbGJLSkJ1VXhWM3l1RzAwRzA1RFdDcWI2ZU1sRm9pUw","nonce":"UHo2WWNNLjZuS2RwODhkTERaX2dvUU9ScElIYlZTOEQxU0hpMGtEOXBrUg==","connection":"Username-Password-Authentication","username":"test@test.com","password":"xxxxxx","popup_options":{},"sso":true,"response_mode":"query","_intstate":"deprecated","_csrf":"Juhfs6gp-zeL2xsjq8OC1oN_bqeOUqHjF7vE","code_challenge_method":"S256","code_challenge":"DvPSTSGBSeUYbBdI0cAoTOdknJyBe5MmN8HHpq83fj8","auth0Client":"eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xMC4xIn0=","protocol":"oauth2"}
 
 ```
 
-4. POST Login
+  
+4. GET http://localhost:3000/?code=39ZEnZ31vrkn0MU1tlE4KnhqCbJTv_hFPXYbUxFM718EQ&state=QnVWZUxWbmtvLTMwb35PMXNTWi1ZdmZBbzFBZy5nNTNfa242UXNzTXhyeQ==
 
 
-5. GET https://dev-0gi5y814.us.auth0.com/authorize/resume?state=7gYZgsoRuqQfujvEoJpkAeltwRc0ZGe2
-
-Response 302
-
-6. GET http://localhost:3000/?code=DdzcZlWT5NpmkdjkzA1mQAR903fiCbrUxTUp0qi6wPCIA&state=M3JjMGtPaWwyQzNBMDF5TWZuZ09uMDVyWTJVblJCTEs2TFZ4NktiTFN5Lg==
-
-7. POST https://dev-0gi5y814.us.auth0.com/oauth/token
+5. POST https://dev-0gi5y814.us.auth0.com/oauth/token
 
 ```json
 {

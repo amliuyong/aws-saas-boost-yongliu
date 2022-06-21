@@ -21,6 +21,7 @@ import './scss/style.scss'
 import { Provider } from 'react-redux'
 import store from './store/index'
 import ScrollToTop from './utils/ScrollToTop'
+import { useAuth0 } from '@auth0/auth0-react'
 
 //const loading = (
 //  <div className="pt-3 text-center">
@@ -30,7 +31,8 @@ import ScrollToTop from './utils/ScrollToTop'
 
 // Containers
 //const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
-const AuthingLayout = React.lazy(() => import('./layout/AuthingLayout'))
+// const AuthingLayout = React.lazy(() => import('./layout/AuthingLayout'))
+const OIDCLayout = React.lazy(() => import('./layout/OIDCLayout'))
 
 App.propTypes = {
   authState: PropTypes.string,
@@ -38,13 +40,15 @@ App.propTypes = {
 
 function App(props) {
   console.log("App.props", props)
+
+  const { logout } = useAuth0()
     return (
       <Provider store={store}>
         <BrowserRouter>
           <ScrollToTop>
             <FetchSettings>
               <Switch>
-                <Route path="/" name="Home" render={(props) => <AuthingLayout {...props} />} />
+                <Route path="/" name="Home" render={ (props) => <OIDCLayout {...props } logout={logout} /> } />
               </Switch>
             </FetchSettings>
           </ScrollToTop>

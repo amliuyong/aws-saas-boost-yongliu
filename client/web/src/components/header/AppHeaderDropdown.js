@@ -26,11 +26,11 @@ import {
 } from '@coreui/react'
 import { cilLockLocked, cilSettings, cilShieldAlt, cilUser } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import { useAuthContext } from '../Auth/authing/useAuthContext'
+import { useAuthContext } from '../Auth/auth0/useAuthContext'
 
 const AppHeaderDropdown = (props) => {
  const {idp} = useAuthContext();
- const is3rdPartIdp = idp === 'authing';
+ const is3rdPartIdp = idp == 'auth0'
 
   const { handleProfileClick, handleChangePasswordClick, onLogout, user } = props
   return (
