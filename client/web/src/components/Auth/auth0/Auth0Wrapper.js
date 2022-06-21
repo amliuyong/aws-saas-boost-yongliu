@@ -1,7 +1,7 @@
 
 import { Auth0Provider } from "@auth0/auth0-react";
 
-export const OIDCAuthWrapper = ({ children }) => {
+export const Auth0Wrapper = ({ children }) => {
   return (
     <Auth0Provider
       domain="dev-0gi5y814.us.auth0.com"

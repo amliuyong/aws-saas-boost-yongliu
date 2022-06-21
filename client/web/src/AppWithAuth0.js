@@ -15,9 +15,9 @@
  */
 
 import { Suspense } from 'react'
+import Auth0App from './components/Auth/auth0/Auth0App'
+import { Auth0Wrapper } from './components/Auth/auth0/Auth0Wrapper'
 import { AuthContextProvider } from './components/Auth/auth0/context/AuthContext'
-import OIDCAuthApp from './components/Auth/auth0/OIDCAuthApp'
-import { OIDCAuthWrapper } from './components/Auth/auth0/OIDCAuthWrapper'
 
 const loading = () => (
   <div className="pt-3 text-center">
@@ -25,16 +25,16 @@ const loading = () => (
   </div>
 )
 
-function AppWithOIDCAuth() {
+function AppWithAuth0() {
   return (
     <Suspense fallback={loading()}>
       <AuthContextProvider idp='auth0'>
-        <OIDCAuthWrapper>
-          <OIDCAuthApp />
-        </OIDCAuthWrapper>
+        <Auth0Wrapper>
+          <Auth0App />
+        </Auth0Wrapper>
       </AuthContextProvider>
     </Suspense>
   )
 }
 
-export default AppWithOIDCAuth
+export default AppWithAuth0

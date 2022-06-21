@@ -19,10 +19,10 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 //import AppWithContext from './AppWithContext'
 import * as serviceWorker from './serviceWorker'
-import AppWithOIDCAuth from './AppWithOIDCAuth'
+import AppWithAuth0 from './AppWithAuth0'
 //import App from "./App";
 
-ReactDOM.render(<AppWithOIDCAuth />,
+ReactDOM.render(<AppWithAuth0 />,
 
 document.getElementById('root'))
 

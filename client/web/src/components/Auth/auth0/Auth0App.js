@@ -20,7 +20,7 @@ import App from './../../../App'
 import { SignIn } from './SigIn'
 import { useAuthContext } from './useAuthContext'
 
-function OIDCAuthApp() {
+function Auth0App() {
   const { user, isLoading, getAccessTokenSilently } = useAuth0()
   const { dispatch } = useAuthContext()
 
@@ -53,4 +53,4 @@ function OIDCAuthApp() {
   )
 }
 
-export default OIDCAuthApp
+export default Auth0App
