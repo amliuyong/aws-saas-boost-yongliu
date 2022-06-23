@@ -19,10 +19,10 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 //import AppWithContext from './AppWithContext'
 import * as serviceWorker from './serviceWorker'
-import AppWithAuth0 from './AppWithAuth0'
+import AppWithAuthWrapper from './AppWithAuthWrapper'
 //import App from "./App";
 
-ReactDOM.render(<AppWithAuth0 />,
+ReactDOM.render(<AppWithAuthWrapper />,
 
 document.getElementById('root'))
 

@@ -15,9 +15,12 @@
  */
 
 import { Suspense } from 'react'
+import AppWithAuth from './AppWithAuth'
 
-import { AuthContextProvider } from './components/Auth/authing/context/AuthContext'
-import AppWithAuthing from './components/Auth/authing/AppWithAuthing'
+import { AuthContextProvider } from './components/Auth/oidc/context/AuthContext'
+
+import AppWithOidc from './components/Auth/oidc/AppWithOidc'
+import { Auth0Wrapper } from './components/Auth/auth0/Auth0Wrapper'
 
 const loading = () => (
   <div className="pt-3 text-center">
@@ -25,14 +28,18 @@ const loading = () => (
   </div>
 )
 
-function AppWithContext() {
+function AppWithAuthWrapper() {
+  const oidc = true
   return (
     <Suspense fallback={loading()}>
-      <AuthContextProvider idp="authing">
-        <AppWithAuthing />
+      <AuthContextProvider oidc={oidc} >
+        {/* {oidc && <AppWithOidc />} */}
+        {oidc &&  <Auth0Wrapper />}
+        {!oidc && <AppWithAuth />}
+       
       </AuthContextProvider>
     </Suspense>
   )
 }
 
-export default AppWithContext
+export default AppWithAuthWrapper

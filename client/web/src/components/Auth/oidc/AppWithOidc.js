@@ -14,35 +14,23 @@
  * limitations under the License.
  */
 
-import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
-import { useAuth0 } from '@auth0/auth0-react'
 import App from './../../../App'
-import { SignIn } from './SigIn'
-import { useAuthContext } from '../oidc/useAuthContext'
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
+import { useAuthContext } from './useAuthContext'
+import { SignIn } from './SignIn'
+import { OidcHandleCallback } from './OidcHandleCallback'
 
-function Auth0App() {
-  const { user, isLoading, getAccessTokenSilently } = useAuth0()
-  const { dispatch } = useAuthContext()
-
-  if (user) {
-    dispatch({ action: 'LOGIN', payload: user })
-  }
-  
-  if (isLoading) {
-    return <p>Loading ...</p>
-  }
-
-  getAccessTokenSilently()
-    .then((token) => {
-      console.log('AccessToken', token)
-    })
-    .catch((error) => {})
+function AppWithOidc() {
+  const { user } = useAuthContext()
 
   return (
     <BrowserRouter>
       <Switch>
         <Route path="/login" exact={true}>
           <SignIn />
+        </Route>
+        <Route path="/callback" exact={true}>
+          <OidcHandleCallback />
         </Route>
         <Route path="/">
           {user && <App />}
@@ -53,4 +41,4 @@ function Auth0App() {
   )
 }
 
-export default Auth0App
+export default AppWithOidc
