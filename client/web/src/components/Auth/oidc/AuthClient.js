@@ -3,22 +3,58 @@ const Base64 = require('crypto-js/enc-base64')
 
 export class AuthClient {
   constructor() {
+    // https://dev-0gi5y814.us.auth0.com/.well-known/openid-configuration
+    // https://authing-test-liuyong.authing.cn/oidc/.well-known/openid-configuration
+
     this.config = {
       client_id: 'RlbKJBuUxV3yuG00G05DWCqb6eMlFoiS',
-      domain: 'https://dev-0gi5y814.us.auth0.com',
+      issuer: 'https://dev-0gi5y814.us.auth0.com',
       redirect_uri: 'http://localhost:3000/callback',
+      audience: 'saas-boost:api',
     }
 
-    console.log('AuthClient config', this.config)
+    // this.config = {
+    //   client_id: '62a8392bb610e1da3f7aeefb',
+    //   issuer: 'https://authing-test-liuyong.authing.cn/oidc',
+    //   redirect_uri: 'http://localhost:3000/callback',
+    // }
+
+    if (this.config.issuer.endsWith('/')) {
+      this.config.issuer = this.config.issuer.substring(
+        0,
+        this.config.issuer.length - 1
+      )
+    }
+
+    if (!this.config.openid_configuration) {
+      this.config.openid_configuration = `${this.config.issuer}/.well-known/openid-configuration`
+    }
+
     this._base64URLEncode = this._base64URLEncode.bind(this)
     this._sha256AndToBase64 = this._sha256AndToBase64.bind(this)
     this._generateId = this._generateId.bind(this)
     this._getLoginUrl = this._getLoginUrl.bind(this)
     this._newVerifier = this._newVerifier.bind(this)
+    this._load_config = this._load_config.bind(this)
 
     this.login = this.login.bind(this)
     this.logout = this.logout.bind(this)
     this.getTokensByCode = this.getTokensByCode.bind(this)
+  }
+
+  async _load_config() {
+    const response = await fetch(this.config.openid_configuration)
+    const openid_configuration = await response.json()
+    const {
+      authorization_endpoint,
+      token_endpoint,
+      userinfo_endpoint,
+    } = openid_configuration
+    this.config.authorization_endpoint = authorization_endpoint
+    this.config.token_endpoint = token_endpoint
+    this.config.userinfo_endpoint = userinfo_endpoint
+    console.log('AuthClient load_config', this.config)
+    sessionStorage.setItem('openid_configuration', JSON.stringify(this.config))
   }
 
   _sha256AndToBase64(buff) {
@@ -51,7 +87,7 @@ export class AuthClient {
     const challenge = this._sha256AndToBase64(verifier)
     const state = 'S' + new Date().getTime()
     const nonce = this._base64URLEncode(this._generateId(64))
-    const audience = 'saas-boost:api'
+
     const params = {
       client_id: this.config.client_id,
       redirect_uri: this.config.redirect_uri,
@@ -60,12 +96,16 @@ export class AuthClient {
       response_mode: 'query',
       state,
       nonce,
-      audience,
       code_challenge: challenge,
       code_challenge_method: 'S256',
     }
+
+    if (this.config.audience) {
+      params.audience = this.config.audience
+    }
+
     const qs = new URLSearchParams(params)
-    const url = `${this.config.domain}/authorize?${qs}`
+    const url = `${this.config.authorization_endpoint}?${qs}`
     return url
   }
 
@@ -75,7 +115,8 @@ export class AuthClient {
     return verifier
   }
 
-  login() {
+  async login() {
+    await this._load_config()
     const verifier = this._newVerifier()
     window.location.href = this._getLoginUrl(verifier)
   }
@@ -85,16 +126,15 @@ export class AuthClient {
     sessionStorage.clear()
     localStorage.clear()
     const returnTo = this.config.redirect_uri.replace('/callback', '')
-    const params = {
-      client_id: this.config.client_id,
-      returnTo,
-    }
-    const qs = new URLSearchParams(params)
-    const url = `${this.config.domain}/v2/logout?${qs}`
-    window.location.href = url
+    window.location.href = returnTo
   }
 
   async getTokensByCode(code) {
+    const token_endpoint = JSON.parse(
+      sessionStorage.getItem('openid_configuration')
+    ).token_endpoint
+    console.log('token_endpoint:', token_endpoint)
+
     const verifier = sessionStorage.getItem('verifier')
     console.log('getTokensByCode() verifier', verifier)
     console.log('getTokensByCode() code', code)
@@ -109,12 +149,11 @@ export class AuthClient {
       redirect_uri,
       code_verifier: verifier,
     }
-    const host = `${this.config.domain}/oauth/token`
+    const host = token_endpoint
     console.log('POST', postPayload)
     const response = await fetch(host, {
       method: 'POST',
       headers: {
-        'auth0-client': this.auth0Client,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams(postPayload),
@@ -125,7 +164,12 @@ export class AuthClient {
   }
 
   async getUserInfoByAccessToken(accessToken) {
-    const host = `${this.config.domain}/userinfo`
+    const userinfo_endpoint = JSON.parse(
+      sessionStorage.getItem('openid_configuration')
+    ).userinfo_endpoint
+    console.log('userinfo_endpoint:', userinfo_endpoint)
+
+    const host = userinfo_endpoint
     const response = await fetch(host, {
       method: 'GET',
       headers: {
@@ -136,5 +180,4 @@ export class AuthClient {
     return result
   }
 }
-
 export default new AuthClient()

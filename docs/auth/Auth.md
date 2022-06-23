@@ -286,3 +286,41 @@ Response --> login page
 }
 
 ```
+
+
+## Permissions
+
+### auth0
+```json
+
+{
+  "iss": "https://dev-0gi5y814.us.auth0.com/",
+  "sub": "auth0|62b137ad054fe6e86ba143e4",
+  "aud": [
+    "saas-boost:api",
+    "https://dev-0gi5y814.us.auth0.com/userinfo"
+  ],
+  "iat": 1655975590,
+  "exp": 1656061990,
+  "azp": "RlbKJBuUxV3yuG00G05DWCqb6eMlFoiS",
+  "scope": "openid profile email",
+  "permissions": [
+    "admin"
+  ]
+}
+```
+
+### authing
+```json
+
+{
+  "jti": "R-Dp5CXY-um-m1ozx8GGo",
+  "sub": "62a831b906966d747c438638",
+  "iat": 1655975472,
+  "exp": 1657185072,
+  "scope": "openid profile email",
+  "iss": "https://authing-test-liuyong.authing.cn/oidc",
+  "aud": "62a8392bb610e1da3f7aeefb"
+}
+
+```
