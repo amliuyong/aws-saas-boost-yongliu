@@ -33,7 +33,9 @@ import { useAuth0 } from '@auth0/auth0-react'
 //const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
 // const AuthingLayout = React.lazy(() => import('./layout/AuthingLayout'))
 
-const Auth0Layout = React.lazy(() => import('./layout/Auth0Layout'))
+//const Auth0Layout = React.lazy(() => import('./layout/Auth0Layout'))
+
+const OidcLayout = React.lazy(() => import('./layout/OidcLayout'))
 
 App.propTypes = {
   authState: PropTypes.string,
@@ -42,14 +44,13 @@ App.propTypes = {
 function App(props) {
   console.log("App.props", props)
 
-  const { logout } = useAuth0()
     return (
       <Provider store={store}>
         <BrowserRouter>
           <ScrollToTop>
             <FetchSettings>
               <Switch>
-                <Route path="/" name="Home" render={ (props) => <Auth0Layout {...props } logout={logout} /> } />
+                <Route path="/" name="Home" render={ (props) => <OidcLayout {...props } /> } />
               </Switch>
             </FetchSettings>
           </ScrollToTop>

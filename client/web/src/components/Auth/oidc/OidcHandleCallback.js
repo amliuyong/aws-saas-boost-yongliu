@@ -21,10 +21,12 @@ export function OidcHandleCallback() {
       let userInfo = await authClient.getUserInfoByAccessToken(
         tokenSet.access_token
       )
-      localStorage.setItem('accessToken', access_token)
-      localStorage.setItem('idToken', id_token)
+
+      console.log("userInfo", userInfo)
+      sessionStorage.setItem('accessToken', access_token)
+      sessionStorage.setItem('idToken', id_token)
       localStorage.setItem('userInfo', JSON.stringify(userInfo))
-      console.log('saved token to localStorage')
+      console.log('saved token to sessionStorage')
       dispatch({ type: 'LOGIN', payload: userInfo })
       history.push('/')
     })()
