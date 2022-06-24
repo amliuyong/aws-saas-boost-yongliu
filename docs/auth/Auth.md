@@ -324,3 +324,73 @@ Response --> login page
 }
 
 ```
+
+### KeyCloak
+```json
+{
+  "exp": 1656041126,
+  "iat": 1656040826,
+  "auth_time": 1656040824,
+  "jti": "3142d7ce-44e9-4fa0-8dc2-0120283cbc5f",
+  "iss": "https://keycloak-sb.demo.solutions.aws.a2z.org.cn/auth/realms/saas-boost-test",
+  "aud": "account",
+  "sub": "c2c18d11-2c62-4f7f-87af-c2aca64af798",
+  "typ": "Bearer",
+  "azp": "saas-boost-test-client",
+  "nonce": "ibRCELzf0eV6K3C0ejKjo5RqKGza0kfo850UxJeQtzjWTfwfaWkX1KT1ZQFTYj7K",
+  "session_state": "0b9c4c30-e797-495a-a560-608d03f58786",
+  "acr": "1",
+  "allowed-origins": [
+    "http://localhost:3000"
+  ],
+  "realm_access": {
+    "roles": [
+      "offline_access",
+      "uma_authorization"
+    ]
+  },
+  "resource_access": {
+    "saas-boost-test-client": {
+      "roles": [
+        "admin-of-saas-boost"
+      ]
+    },
+    "account": {
+      "roles": [
+        "manage-account",
+        "manage-account-links",
+        "view-profile"
+      ]
+    }
+  },
+  "scope": "openid profile email",
+  "email_verified": false,
+  "preferred_username": "test",
+  "email": "test@test.com"
+}
+
+```
+
+## okta
+```json
+{
+  "ver": 1,
+  "jti": "AT.80l6TR30vJYRPOTfl1LpLY24BMW2Mt6DFz_r1Rcv0jk",
+  "iss": "https://trial-8328523.okta.com/oauth2/default",
+  "aud": "api://default",
+  "iat": 1656062013,
+  "exp": 1656065613,
+  "cid": "0oa1exbutfeNvLgDn697",
+  "uid": "00u1exikjopWU04A8697",
+  "scp": [
+    "profile",
+    "openid",
+    "email"
+  ],
+  "auth_time": 1656061794,
+  "sub": "nonadmin@test.com",
+  "group": [
+    "saas-boost-admin"
+  ]
+}
+```
