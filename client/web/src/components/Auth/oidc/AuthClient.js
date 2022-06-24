@@ -17,6 +17,14 @@ export class AuthClient {
     //   client_id: '62a8392bb610e1da3f7aeefb',
     //   issuer: 'https://authing-test-liuyong.authing.cn/oidc',
     //   redirect_uri: 'http://localhost:3000/callback',
+    //   audience: '62a8392bb610e1da3f7aeefb'
+    // }
+
+    // this.config = {
+    //   client_id: 'saas-boost-test-client',
+    //   issuer: 'https://keycloak-sb.demo.solutions.aws.a2z.org.cn/auth/realms/saas-boost-test',
+    //   redirect_uri: 'http://localhost:3000/callback',
+    //   audience: 'saas-boost-test-client'
     // }
 
     if (this.config.issuer.endsWith('/')) {
@@ -43,18 +51,26 @@ export class AuthClient {
   }
 
   async _load_config() {
+    const configLocalStorageKey = `openid_configuration-${this.config.client_id}`
+    if (localStorage.getItem(configLocalStorageKey)) {
+      console.log(`${configLocalStorageKey} already existed in localStorage`)
+      return
+    }
+
     const response = await fetch(this.config.openid_configuration)
     const openid_configuration = await response.json()
     const {
       authorization_endpoint,
       token_endpoint,
       userinfo_endpoint,
+      end_session_endpoint,
     } = openid_configuration
     this.config.authorization_endpoint = authorization_endpoint
     this.config.token_endpoint = token_endpoint
     this.config.userinfo_endpoint = userinfo_endpoint
+    this.config.end_session_endpoint = end_session_endpoint
     console.log('AuthClient load_config', this.config)
-    sessionStorage.setItem('openid_configuration', JSON.stringify(this.config))
+    localStorage.setItem(configLocalStorageKey, JSON.stringify(this.config))
   }
 
   _sha256AndToBase64(buff) {
@@ -84,6 +100,11 @@ export class AuthClient {
   }
 
   _getLoginUrl(verifier) {
+    const configLocalStorageKey = `openid_configuration-${this.config.client_id}`
+    const authorization_endpoint = JSON.parse(
+      localStorage.getItem(configLocalStorageKey)
+    ).authorization_endpoint
+
     const challenge = this._sha256AndToBase64(verifier)
     const state = 'S' + new Date().getTime()
     const nonce = this._base64URLEncode(this._generateId(64))
@@ -105,7 +126,7 @@ export class AuthClient {
     }
 
     const qs = new URLSearchParams(params)
-    const url = `${this.config.authorization_endpoint}?${qs}`
+    const url = `${authorization_endpoint}?${qs}`
     return url
   }
 
@@ -123,15 +144,31 @@ export class AuthClient {
 
   logout() {
     console.log('logout ...')
+    const configLocalStorageKey = `openid_configuration-${this.config.client_id}`
+    const return_to = this.config.redirect_uri.replace('/callback', '')
+    const end_session_endpoint = JSON.parse(
+      localStorage.getItem(configLocalStorageKey)
+    ).end_session_endpoint
+
+    if (end_session_endpoint) {
+      const idToken = sessionStorage.getItem('idToken')
+      const params = {
+        post_logout_redirect_uri: return_to,
+        id_token_hint: idToken,
+      }
+      const qs = new URLSearchParams(params)
+      const url = `${end_session_endpoint}?${qs}`
+      fetch(url)
+    }
     sessionStorage.clear()
-    localStorage.clear()
-    const returnTo = this.config.redirect_uri.replace('/callback', '')
-    window.location.href = returnTo
+    window.location.href = return_to
   }
 
   async getTokensByCode(code) {
+    const configLocalStorageKey = `openid_configuration-${this.config.client_id}`
+
     const token_endpoint = JSON.parse(
-      sessionStorage.getItem('openid_configuration')
+      localStorage.getItem(configLocalStorageKey)
     ).token_endpoint
     console.log('token_endpoint:', token_endpoint)
 
@@ -164,8 +201,10 @@ export class AuthClient {
   }
 
   async getUserInfoByAccessToken(accessToken) {
+    const configLocalStorageKey = `openid_configuration-${this.config.client_id}`
+
     const userinfo_endpoint = JSON.parse(
-      sessionStorage.getItem('openid_configuration')
+      localStorage.getItem(configLocalStorageKey)
     ).userinfo_endpoint
     console.log('userinfo_endpoint:', userinfo_endpoint)
 
@@ -181,3 +220,25 @@ export class AuthClient {
   }
 }
 export default new AuthClient()
+export function getUserInfo() {
+  if (sessionStorage.getItem('userInfo')) {
+    return JSON.parse(sessionStorage.getItem('userInfo'))
+  }
+  return null
+}
+
+export function getAccessToken() {
+  return sessionStorage.getItem('accessToken')
+}
+
+export function saveLoginInfo({
+  access_token,
+  id_token,
+  refresh_token,
+  userInfo,
+}) {
+  sessionStorage.setItem('accessToken', access_token)
+  sessionStorage.setItem('idToken', id_token)
+  sessionStorage.setItem('refresh_token', refresh_token)
+  sessionStorage.setItem('userInfo', JSON.stringify(userInfo))
+}

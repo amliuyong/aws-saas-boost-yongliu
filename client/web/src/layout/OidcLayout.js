@@ -28,7 +28,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 // sidebar nav config
 import navigation from '../_nav'
-import authClient from '../components/Auth/oidc/AuthClient'
+import authClient, { getUserInfo } from '../components/Auth/oidc/AuthClient'
 
 const mapStateToProps = (state) => {
   return { settings: state.settings, setup: state.settings.setup }
@@ -48,7 +48,7 @@ class OidcLayout extends Component {
     this.setState((state) => {
       return {
         ...state,
-        user: JSON.parse(localStorage.getItem('userInfo')),
+        user: getUserInfo(),
       }
     })
   }

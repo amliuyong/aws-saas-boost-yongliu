@@ -1,4 +1,5 @@
 import { createContext, useReducer, useEffect } from 'react'
+import { getUserInfo } from '../AuthClient'
 
 export const AuthContext = createContext()
 
@@ -7,7 +8,6 @@ export const authReducer = (state, action) => {
     case 'LOGIN':
       return { ...state, user: action.payload }
     case 'LOGOUT':
-      localStorage.clear()
       return { ...state, user: null }
     default:
       return state
@@ -21,11 +21,9 @@ export const AuthContextProvider = ({ children, oidc }) => {
   })
 
   useEffect(() => {
-    const userInfo = localStorage.getItem('userInfo')
-    let user = null
+    const userInfo = getUserInfo()
     if (userInfo) {
-      user = JSON.parse(userInfo)
-      dispatch({ type: 'LOGIN', payload: user })
+      dispatch({ type: 'LOGIN', payload: userInfo })
     }
   }, [])
 

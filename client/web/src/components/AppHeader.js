@@ -27,7 +27,25 @@ const AppHeader = (props) => {
   console.log('AppHeader.props', props)
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
-  const { handleProfileClick, handleChangePasswordClick, onLogout, user, router } = props
+  const {
+    handleProfileClick,
+    handleChangePasswordClick,
+    onLogout,
+    user,
+    router,
+  } = props
+
+  let displayUserName = null
+  if (user && user.name) {
+    displayUserName = user.name
+  } else if (user && user.username) {
+    displayUserName = user.username
+  } else if (user && user.preferred_username) {
+    displayUserName = user.preferred_username
+  } else if (user && user.email) {
+    displayUserName = user.email
+  }
+
   return (
     <CHeader position="sticky" className="mb-4">
       <CContainer fluid>
@@ -40,7 +58,7 @@ const AppHeader = (props) => {
             onLogout={onLogout}
           />
         </CHeaderNav>
-        { user && user.name && <span>{user.name}</span> }
+        {displayUserName && <span>{displayUserName}</span>}
       </CContainer>
       <CHeaderDivider />
       <CContainer fluid>
