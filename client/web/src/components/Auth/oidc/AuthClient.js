@@ -6,33 +6,35 @@ export class AuthClient {
     // https://dev-0gi5y814.us.auth0.com/.well-known/openid-configuration
     // https://authing-test-liuyong.authing.cn/oidc/.well-known/openid-configuration
 
-    this.config = {
-      client_id: 'RlbKJBuUxV3yuG00G05DWCqb6eMlFoiS',
-      metadata_uri: 'https://dev-0gi5y814.us.auth0.com',
-      redirect_uri: 'http://localhost:3000/callback',
-      audience: 'saas-boost:api',
-    }
+    // this.config = {
+    //   client_id: 'RlbKJBuUxV3yuG00G05DWCqb6eMlFoiS',
+    //   issuer: 'https://dev-0gi5y814.us.auth0.com',
+    //   redirect_uri: 'http://localhost:3000/callback',
+    //   audience: 'saas-boost:api',
+    // }
 
-    this.config = {
-      client_id: '62a8392bb610e1da3f7aeefb',
-      issuer: 'https://authing-test-liuyong.authing.cn/oidc',
-      redirect_uri: 'http://localhost:3000/callback',
-      audience: '62a8392bb610e1da3f7aeefb',
-    }
+    // this.config = {
+    //   client_id: '62a8392bb610e1da3f7aeefb',
+    //   issuer: 'https://authing-test-liuyong.authing.cn/oidc',
+    //   redirect_uri: 'http://localhost:3000/callback',
+    //   audience: '62a8392bb610e1da3f7aeefb',
+    // }
 
-    this.config = {
-      client_id: 'saas-boost-test-client',
-      issuer:
-        'https://keycloak-sb.demo.solutions.aws.a2z.org.cn/auth/realms/saas-boost-test',
-      redirect_uri: 'http://localhost:3000/callback',
-      //audience: 'saas-boost-test-client'
-    }
+    // this.config = {
+    //   client_id: 'saas-boost-test-client',
+    //   issuer:
+    //     'https://keycloak-sb.demo.solutions.aws.a2z.org.cn/auth/realms/saas-boost-test',
+    //   redirect_uri: 'http://localhost:3000/callback',
+    //   //audience: 'saas-boost-test-client'
+    // }
 
     this.config = {
       client_id: '0oa1exbutfeNvLgDn697',
       issuer: 'https://trial-8328523.okta.com/oauth2/default',
       redirect_uri: 'http://localhost:3000/callback',
-      audience: 'api://default',
+      //audience: 'api://default',
+      //audience: '0oa1exbutfeNvLgDn697'
+      //audience: 'api://saas-boost'
     }
 
     if (!this.config.openid_configuration) {
@@ -113,7 +115,7 @@ export class AuthClient {
     const params = {
       client_id: this.config.client_id,
       redirect_uri: this.config.redirect_uri,
-      scope: 'openid profile email',
+      scope: 'openid profile email admin',
       response_type: 'code',
       response_mode: 'query',
       state,

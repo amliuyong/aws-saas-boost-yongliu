@@ -383,14 +383,22 @@ Response --> login page
   "cid": "0oa1exbutfeNvLgDn697",
   "uid": "00u1exikjopWU04A8697",
   "scp": [
+    "saas-boost:admin",
     "profile",
     "openid",
     "email"
   ],
   "auth_time": 1656061794,
   "sub": "nonadmin@test.com",
-  "group": [
-    "saas-boost-admin"
+
+  "scp": [
+    "saas-boost:admin",
+    "profile",
+    "openid",
+    "email"
+  ],
+  "groups": [
+    "saas-boost:admin"
   ]
 }
 ```

@@ -34,7 +34,6 @@ function AppWithAuthWrapper() {
     <Suspense fallback={loading()}>
       <AuthContextProvider oidc={oidc} >
         {oidc && <AppWithOidc />}
-        {/* {oidc &&  <Auth0Wrapper />} */}
         {!oidc && <AppWithAuth />}
        
       </AuthContextProvider>
