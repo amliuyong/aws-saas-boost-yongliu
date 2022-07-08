@@ -30,8 +30,7 @@ Parameters:
   AdminEmailAddress:
     Description: Email address of admin user to receive temporary password notification
     Type: String
-    AllowedPattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
-    ConstraintDescription: Must be a valid email address.
+    Default: ''
   DomainName:
     Description: The domain your workload is hosted at formatted as [env].[domain].[com]
     Type: String
@@ -67,10 +66,14 @@ Parameters:
   AuthMethod:
     Description: Authentication method
     Type: String
-    Default: OIDC
     AllowedValues:
       - CognitoUserPool
       - OIDC
+  OIDCIssuer:
+    Description: OIDC Issuer
+    Type: String
+    Default: ''
+
 Conditions:
   ProvisionManagedAD: !Equals [!Ref DeployActiveDirectory, 'true']
   CreateCognitoResources: !Equals
@@ -629,6 +632,8 @@ Resources:
         AdminEmailAddress: !Ref AdminEmailAddress
         WebS3Bucket: !Ref AdminWeb
         AuthMethod: !Ref AuthMethod
+        OIDCIssuer: !Ref OIDCIssuer
+        DomainName: !Ref DomainName
   core:
     Type: AWS::CloudFormation::Stack
     DependsOn:

@@ -21,9 +21,8 @@ Parameters:
     MinLength: 1
   AdminEmailAddress:
     Description: Email address of admin user to receive temporary password notification
-    AllowedPattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
-    ConstraintDescription: Must be a valid email address.
     Type: String
+    Default: ''
   WebS3Bucket:
     Description: S3 Bucket to host the Admin Console web app
     Type: String
@@ -34,6 +33,14 @@ Parameters:
     AllowedValues:
       - CognitoUserPool
       - OIDC
+  OIDCIssuer:
+    Description: OIDC Issuer
+    Type: String
+    Default: ''
+  DomainName:
+    Description: Domain Name
+    Type: String
+    Default: ''
 
 Conditions:
   CreateCognitoResources: !Equals
@@ -42,6 +49,7 @@ Conditions:
   IsCNRegion: !Or
     - !Equals [ !Sub '${AWS::Region}', 'cn-north-1' ]
     - !Equals [ !Sub '${AWS::Region}', 'cn-northwest-1' ]
+  DomainNameSet: !Not [ !Equals [!Ref DomainName, ''] ]
 
 Resources:
   ConsoleOriginAccessIdentity:
@@ -58,6 +66,11 @@ Resources:
         Enabled: true
         IPV6Enabled: false
         HttpVersion: http2
+        Aliases:
+          - 'Fn::If':
+              - DomainNameSet
+              - !Ref DomainName
+              - !Ref AWS::NoValue
         Origins:
           - DomainName: !Sub ${WebS3Bucket}.s3.${AWS::Region}.${AWS::URLSuffix}
             Id: !Sub sb-${Environment}-s3-website
@@ -247,9 +260,17 @@ Outputs:
     Value: !Ref ConsoleIdentityPool
     Export:
       Name: !Sub saas-boost::${Environment}-${AWS::Region}:identityPoolId
+
   CloudFrontDistributionUrl:
-    Description: Saas Boost Cloudfront distribution URL
+    Description: Saas Boost Cloudfront distribution URL or domain name
     Value: !Sub https://${ConsoleCloudFrontDistribution.DomainName}
+  WebUrl:
+    Description: Web Url (domain name)
+    Value:
+      'Fn::If':
+        - DomainNameSet
+        - !Sub https://${DomainName}
+        - !Sub https://${ConsoleCloudFrontDistribution.DomainName}
     Export:
       Name: !Sub saas-boost::${Environment}-${AWS::Region}:webUrl
   CognitoSignOnBaseUri:
