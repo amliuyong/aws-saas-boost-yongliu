@@ -93,6 +93,7 @@ public class SaaSBoostInstall {
     private String oidcClientId;
     private String oidcIssuer;
     private String domainName;
+    private String oidcScope;
 
     protected enum AUTH_METHOD {
         COGNITO_USER_POOL(1, "Cognito User Pool", "CognitoUserPool"),
@@ -370,6 +371,17 @@ public class SaaSBoostInstall {
         }
         this.oidcAudience = oidcAudience;
 
+        String extraOidcScope = null;
+        if (!authWithCognito) {
+            System.out.print("Enter extra OIDC scope for permission: ");
+            extraOidcScope = Keyboard.readString();
+            if (extraOidcScope.strip().length() == 0) {
+                this.oidcScope = "openid";
+            } else {
+                this.oidcScope = "openid " + extraOidcScope;
+            }
+        }
+
         String domainName = null;
         while (isCnRegion) {
             System.out.print("Enter domain name: ");
@@ -425,6 +437,10 @@ public class SaaSBoostInstall {
         if (this.domainName != null) {
             outputMessage("Domain Name: " + this.domainName);
         }
+        if (this.oidcScope != null) {
+            outputMessage("OIDC scope: " + this.oidcScope);
+        }
+
         outputMessage("Install optional Analytics Module: " + this.useAnalyticsModule);
         if (this.useAnalyticsModule && isNotBlank(this.quickSightUsername)) {
             outputMessage("Amazon QuickSight user for Analytics Module: " + this.quickSightUsername);
@@ -1607,6 +1623,10 @@ public class SaaSBoostInstall {
         if (this.domainName != null) {
             templateParameters.add(Parameter.builder().parameterKey("DomainName").parameterValue(this.domainName).build());
         }
+        if (this.oidcScope != null) {
+            templateParameters.add(Parameter.builder().parameterKey("OIDCScope").parameterValue(this.oidcScope).build());
+        }
+
         templateParameters.add(Parameter.builder().parameterKey("AuthMethod").parameterValue(this.authMethod.value).build());
         templateParameters.add(Parameter.builder().parameterKey("SaaSBoostBucket").parameterValue(saasBoostArtifactsBucket.getBucketName()).build());
         templateParameters.add(Parameter.builder().parameterKey("Version").parameterValue(VERSION).build());
@@ -1930,6 +1950,9 @@ public class SaaSBoostInstall {
                 if (this.oidcAudience != null) {
                     env.put("REACT_APP_OIDC_AUDIENCE", this.oidcAudience);
                 }
+                env.put("REACT_APP_OIDC_SCOPE", this.oidcScope);
+
+
             }
             env.put("REACT_APP_WEB_URI", webUrl);
             env.put("REACT_APP_API_URI", exportsMap.get(prefix + "publicApiUrl"));

@@ -74,6 +74,12 @@ Parameters:
     Type: String
     Default: ''
 
+  OIDCScope:
+    Description: OIDC Scope
+    Type: String
+    Default: ''
+
+
 Conditions:
   ProvisionManagedAD: !Equals [!Ref DeployActiveDirectory, 'true']
   CreateCognitoResources: !Equals
@@ -838,6 +844,11 @@ Resources:
             - CreateCognitoResources
             - !GetAtt web.Outputs.SBUserPool
             - ''
+        OIDCScope:
+          'Fn::If':
+            - CreateCognitoResources
+            - !Ref AWS::NoValue
+            - !Ref OIDCScope
         BillingServiceGetPlans: !GetAtt billing.Outputs.BillingServiceGetPlansArn
         MetricsServiceQuery: !GetAtt metrics.Outputs.QueryArn
         MetricsServiceDatasets: !GetAtt metrics.Outputs.DatasetsArn

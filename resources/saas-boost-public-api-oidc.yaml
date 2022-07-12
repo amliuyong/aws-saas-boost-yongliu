@@ -124,6 +124,10 @@ Parameters:
   UserServiceToken:
     Description: User Service auth token Lambda ARN
     Type: String
+  OIDCScope:
+    Description: OIDC Scope
+    Type: String
+    Default: ''
 
 Resources:
   ApiGatewayLoggingRole:

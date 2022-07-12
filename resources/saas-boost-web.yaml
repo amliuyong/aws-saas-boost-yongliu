@@ -262,7 +262,7 @@ Outputs:
       Name: !Sub saas-boost::${Environment}-${AWS::Region}:identityPoolId
 
   CloudFrontDistributionUrl:
-    Description: Saas Boost Cloudfront distribution URL or domain name
+    Description: Saas Boost Cloudfront distribution URL
     Value: !Sub https://${ConsoleCloudFrontDistribution.DomainName}
   WebUrl:
     Description: Web Url (domain name)
