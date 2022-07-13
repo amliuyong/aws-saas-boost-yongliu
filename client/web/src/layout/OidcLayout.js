@@ -64,9 +64,12 @@ class OidcLayout extends Component {
         }
       })
     }
+
+    const oidcNavigation =  navigation.filter((nav) => nav.name != 'Users')
+     
     return (
       <div>
-        <AppSidebar navigation={navigation} />
+        <AppSidebar navigation={oidcNavigation} />
         <div className="wrapper d-flex flex-column min-vw-100 min-vh-100 bg-light">
           <Suspense fallback={this.loading()}>
             <AppHeader

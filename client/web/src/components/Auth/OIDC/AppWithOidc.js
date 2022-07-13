@@ -4,6 +4,9 @@ import { OidcSignIn } from './OidcSignIn'
 import App from '../../../App'
 import IdleTimer from 'react-idle-timer'
 
+export const OIDC_STORAGE_USER_KEY = 'OidcUserInfo'
+export const OIDC_AUTH_METHOD = 'OIDC'
+
 export const AppWithOidc = () => {
   const [signOutReason, setSignOutReason] = useState()
 
@@ -31,16 +34,16 @@ export const AppWithOidc = () => {
   if (auth.error) {
     return <div>Oops... {auth.error.message}</div>
   }
- const saveUserInfo = (user) => {
-    localStorage.setItem("userInfo", JSON.stringify(user))
+  const saveUserInfo = (user) => {
+    sessionStorage.setItem(OIDC_STORAGE_USER_KEY, JSON.stringify(user))
   }
 
- const removeUserInfo =()=> {
-    localStorage.removeItem("userInfo")
+  const removeUserInfo = () => {
+    sessionStorage.removeItem(OIDC_STORAGE_USER_KEY)
   }
 
   if (auth.isAuthenticated) {
-    saveUserInfo(auth.user);
+    saveUserInfo(auth.user)
     return (
       <Fragment>
         <Suspense fallback={loading()}>

@@ -21,6 +21,7 @@ import './scss/style.scss'
 import { Provider } from 'react-redux'
 import store from './store/index'
 import ScrollToTop from './utils/ScrollToTop'
+import { ConfirmSignIn } from 'aws-amplify-react'
 
 //const loading = (
 //  <div className="pt-3 text-center">
@@ -37,6 +38,7 @@ App.propTypes = {
 }
 
 function App(props) {
+  console.log("APP.props", props)
   if (props.authState === 'signedIn') {
     const oidcAuth = props.oidcAuth
     const isLoginWithOidc = !!props.oidcAuth
