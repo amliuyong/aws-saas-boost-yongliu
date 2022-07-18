@@ -35,69 +35,20 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.PublicKey;
 import java.util.Base64;
+import java.util.Date;
 
 
-public class OidcAuthorizer implements RequestHandler<TokenAuthorizerContext, AuthPolicy>  {
+public class OidcAuthorizer implements RequestHandler<TokenAuthorizerContext, AuthPolicy> {
+    public static final String SCOPE_ADMIN = System.getenv("SCOPE_ADMIN");
     private static final Logger LOGGER = LoggerFactory.getLogger(OidcAuthorizer.class);
-    private static final String AWS_REGION = System.getenv("AWS_REGION");
-    private static final String SAAS_BOOST_ENV = System.getenv("SAAS_BOOST_ENV");
     private static final String OIDC_ISSUER = System.getenv("OIDC_ISSUER");
 
     @Override
     public AuthPolicy handleRequest(TokenAuthorizerContext input, Context context) {
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String token = input.getAuthorizationToken();
         LOGGER.info(token);
-
-        String jwtToken = token.split(" ")[1];
-        String header = jwtToken.split("\\.")[0];
-        LOGGER.info("header: {}", header);
-        String headerDecoded = new String(Base64.getDecoder().decode(header));
-        LOGGER.info("headerDecoded: {}", headerDecoded);
-        String openidConfiguration = OIDC_ISSUER + "/.well-known/openid-configuration";
-        LOGGER.info("openidConfiguration: {}", openidConfiguration);
-        try {
-            JsonNode headerJson = objectMapper.readTree(headerDecoded);
-            String kid = headerJson.get("kid").asText();
-            LOGGER.info("kid: {}", kid);
-            JsonNode jsonNode = objectMapper.readTree(URI.create(openidConfiguration).toURL());
-            String jwksUri = jsonNode.get("jwks_uri").asText();
-            LOGGER.info("jwksUri: {}", jwksUri);
-            JwkProvider provider = new UrlJwkProvider(URI.create(jwksUri).toURL());
-            Jwk jwk = provider.get(kid);
-            PublicKey pubKey = jwk.getPublicKey();
-            LOGGER.info("pubKey: {}", pubKey);
-            Claims claims = Jwts.parserBuilder().setSigningKey(pubKey).build()
-                    .parseClaimsJws(jwtToken).getBody();
-            LOGGER.info("claims: {}", claims);
-            LOGGER.info("claims.scope: {}", claims.get("scope"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (JwkException e) {
-            throw new RuntimeException(e);
-        }
-
-
-        //Jwts.parserBuilder().setSigningKey()
-
-        // validate the incoming token
-        // and produce the principal user identifier associated with the token
-
-        // this could be accomplished in a number of ways:
-        // 1. Call out to OAuth provider
-        // 2. Decode a JWT token in-line
-        // 3. Lookup in a self-managed DB
-        String principalId = "user";
-
-        // if the client token is not recognized or invalid
-        // you can send a 401 Unauthorized response to the client by failing like so:
-        // throw new RuntimeException("Unauthorized");
-
-        // if the token is valid, a policy should be generated which will allow or deny access to the client
-
-        // if access is denied, the client will receive a 403 Access Denied response
-        // if access is allowed, API Gateway will proceed with the back-end integration configured on the method that was called
-
+        String principalId = verifyToken(token);
         String methodArn = input.getMethodArn();
         String[] arnPartials = methodArn.split(":");
         String region = arnPartials[3];
@@ -105,23 +56,92 @@ public class OidcAuthorizer implements RequestHandler<TokenAuthorizerContext, Au
         String[] apiGatewayArnPartials = arnPartials[5].split("/");
         String restApiId = apiGatewayArnPartials[0];
         String stage = apiGatewayArnPartials[1];
-        String httpMethod = apiGatewayArnPartials[2];
-        String resource = ""; // root resource
-        if (apiGatewayArnPartials.length == 4) {
-            resource = apiGatewayArnPartials[3];
-        }
-
-        // this function must generate a policy that is associated with the recognized principal user identifier.
-        // depending on your use case, you might store policies in a DB, or generate them on the fly
-
-        // keep in mind, the policy is cached for 5 minutes by default (TTL is configurable in the authorizer)
-        // and will apply to subsequent calls to any method/resource in the RestApi
-        // made with the same token
-
-        // the example policy below denies access to all resources in the RestApi
-        AuthPolicy policy = new AuthPolicy(principalId,
+        return new AuthPolicy(principalId,
                 AuthPolicy.PolicyDocument.getAllowAllPolicy(region, awsAccountId, restApiId, stage));
-        return policy;
     }
 
+    /**
+     * verify OIDC access token and check permissions
+     *
+     * @param token OIDC access token
+     * @return subject in token claims
+     */
+    private String verifyToken(String token) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jwtToken = token.split(" ")[1];
+        String header = jwtToken.split("\\.")[0];
+        String headerDecoded = new String(Base64.getDecoder().decode(header));
+        LOGGER.info("headerDecoded: {}", headerDecoded);
+        String openidConfiguration = OIDC_ISSUER + "/.well-known/openid-configuration";
+        LOGGER.info("openidConfiguration: {}", openidConfiguration);
+        try {
+            JsonNode headerJson = objectMapper.readTree(headerDecoded);
+            String kid = headerJson.get("kid").asText();
+            JsonNode jsonNode = objectMapper.readTree(URI.create(openidConfiguration).toURL());
+            String jwksUri = jsonNode.get("jwks_uri").asText();
+            LOGGER.info("jwksUri: {}", jwksUri);
+            JwkProvider provider = new UrlJwkProvider(URI.create(jwksUri).toURL());
+            Jwk jwk = provider.get(kid);
+            PublicKey pubKey = jwk.getPublicKey();
+            Claims claims = Jwts.parserBuilder().setSigningKey(pubKey).build()
+                    .parseClaimsJws(jwtToken).getBody();
+            LOGGER.info("claims: {}", claims);
+            checkPermissions(claims);
+            if (claims.getExpiration().getTime() - 5000 <= new Date().getTime()) {
+                throw new RuntimeException("token expired");
+            }
+            return claims.getSubject();
+        } catch (IOException | JwkException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    /**
+     * Check permissions based on scope or user group
+     *
+     * if SCOPE_ADMIN not set, skip checking
+     * for cognito-idp, check group name: 'cognito:groups'
+     * for okta, check group name: 'groups'
+     * for other OIDC IDPs, check scope, it should contain desired scope
+     *
+     * @param claims
+     */
+    private void checkPermissions(Claims claims) {
+        if (SCOPE_ADMIN == null) {
+            return;
+        }
+        String scope = "";
+        if (claims.get("scope") != null) {
+            scope = claims.get("scope").toString();
+        } else if (claims.get("scp") != null) {
+            scope = claims.get("scp").toString();
+        }
+        LOGGER.info("claims.scope: {}", scope);
+        if (OIDC_ISSUER.contains("cognito-idp")) {
+            checkGroup(claims, "cognito:groups");
+        } else if (OIDC_ISSUER.contains("okta.com")) {
+            checkGroup(claims, "groups");
+        } else if (!scope.contains(SCOPE_ADMIN)) {
+            throw new RuntimeException("invalid scope");
+        }
+    }
+
+    /**
+     * Check user group in claims, if desired user group not found, throw Exception
+     *
+     * @param claims
+     * @param groupName
+     */
+    private void checkGroup(Claims claims, String groupName) {
+        LOGGER.info("check group: " + groupName);
+        if (claims.get(groupName) != null) {
+            String cognitoGroups = claims.get(groupName).toString();
+            if (!cognitoGroups.contains(SCOPE_ADMIN)) {
+                throw new RuntimeException("invalid group");
+            }
+        } else {
+            throw new RuntimeException("cannot find group " + groupName);
+        }
+    }
 }
