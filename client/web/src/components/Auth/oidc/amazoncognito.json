@@ -1,0 +1,15 @@
+{
+  "authorization_endpoint": "https://sb-userpool-test.auth.us-west-2.amazoncognito.com/oauth2/authorize",
+  "id_token_signing_alg_values_supported": ["RS256"],
+  "issuer": "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_3yE7LvIXB",
+  "jwks_uri": "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_3yE7LvIXB/.well-known/jwks.json",
+  "response_types_supported": ["code", "token"],
+  "scopes_supported": ["openid", "email", "phone", "profile"],
+  "subject_types_supported": ["public"],
+  "token_endpoint": "https://sb-userpool-test.auth.us-west-2.amazoncognito.com/oauth2/token",
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_basic",
+    "client_secret_post"
+  ],
+  "userinfo_endpoint": "https://sb-userpool-test.auth.us-west-2.amazoncognito.com/oauth2/userInfo"
+}
