@@ -21,6 +21,7 @@ import './scss/style.scss'
 import { Provider } from 'react-redux'
 import store from './store/index'
 import ScrollToTop from './utils/ScrollToTop'
+import { ConfirmSignIn } from 'aws-amplify-react'
 
 //const loading = (
 //  <div className="pt-3 text-center">
@@ -30,20 +31,25 @@ import ScrollToTop from './utils/ScrollToTop'
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
+const OidcLayout = React.lazy(() => import('./layout/OidcLayout'))
 
 App.propTypes = {
   authState: PropTypes.string,
 }
 
 function App(props) {
+  console.log("APP.props", props)
   if (props.authState === 'signedIn') {
+    const oidcAuth = props.oidcAuth
+    const isLoginWithOidc = !!props.oidcAuth
     return (
       <Provider store={store}>
         <BrowserRouter>
           <ScrollToTop>
             <FetchSettings>
               <Switch>
-                <Route path="/" name="Home" render={(props) => <DefaultLayout {...props} />} />
+              {!isLoginWithOidc && <Route path="/" name="Home" render={(props) => <DefaultLayout {...props} />} />}
+              {isLoginWithOidc && <Route path="/" name="Home" render={(props) => <OidcLayout {...props} oidcAuth={oidcAuth} />} />}
               </Switch>
             </FetchSettings>
           </ScrollToTop>

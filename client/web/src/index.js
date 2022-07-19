@@ -17,10 +17,10 @@ import 'react-app-polyfill/stable'
 import 'core-js'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import AppWithAuth from './AppWithAuth'
 import * as serviceWorker from './serviceWorker'
+import { AppWithAuthWrapper } from './AppWithWrapper'
 
-ReactDOM.render(<AppWithAuth />, document.getElementById('root'))
+ReactDOM.render(<AppWithAuthWrapper />, document.getElementById('root'))
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

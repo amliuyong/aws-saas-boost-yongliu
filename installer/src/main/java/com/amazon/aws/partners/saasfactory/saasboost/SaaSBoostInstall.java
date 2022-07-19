@@ -60,7 +60,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SaaSBoostInstall {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SaaSBoostInstall.class);
     private static final Region AWS_REGION = Region.of(System.getenv(SdkSystemSetting.AWS_REGION.environmentVariable()));
     private static final String OS = System.getProperty("os.name").toLowerCase();
@@ -88,6 +87,43 @@ public class SaaSBoostInstall {
     private boolean useQuickSight = false;
     private String quickSightUsername;
     private String quickSightUserArn;
+    private String oidcAudience;
+    private String emailAddress;
+    private AUTH_METHOD authMethod;
+    private String oidcClientId;
+    private String oidcIssuer;
+    private String domainName;
+    private String oidcScope;
+
+    protected enum AUTH_METHOD {
+        COGNITO_USER_POOL(1, "Cognito User Pool", "CognitoUserPool"),
+        OIDC(2, "OAuth2.0/OpenID Connect", "OIDC");
+
+        private final int choice;
+        private final String prompt;
+        private final String value;
+
+        AUTH_METHOD(int choice, String prompt, String value) {
+            this.choice = choice;
+            this.prompt = prompt;
+            this.value = value;
+        }
+
+        public String getPrompt() {
+            return String.format("%2d. %s", choice, prompt);
+        }
+
+        public static AUTH_METHOD ofChoice(int choice) {
+            AUTH_METHOD auth = null;
+            for (AUTH_METHOD a : AUTH_METHOD.values()) {
+                if (a.choice == choice) {
+                    auth = a;
+                    break;
+                }
+            }
+            return auth;
+        }
+    }
 
     protected enum ACTION {
         INSTALL(1, "New AWS SaaS Boost install.", false),
@@ -233,6 +269,7 @@ public class SaaSBoostInstall {
 
     protected void installSaaSBoost(String existingBucket) {
         LOGGER.info("Performing new installation of AWS SaaS Boost");
+        boolean isCnRegion = AWS_REGION.toString().startsWith("cn-");
 
         // Check if yarn.lock exists in the client/web folder
         // If it doesn't, exit and ask them to run yarn which will download the NPM dependencies
@@ -254,8 +291,34 @@ public class SaaSBoostInstall {
             }
         }
 
-        String emailAddress;
-        while (true) {
+        AUTH_METHOD authMethodChoose = AUTH_METHOD.OIDC;
+        while (!isCnRegion) {
+            System.out.println("Select authentication method");
+            for (AUTH_METHOD authMethod : AUTH_METHOD.values()) {
+                System.out.println(authMethod.getPrompt());
+            }
+            System.out.print("Please select an option to continue (1-" + AUTH_METHOD.values().length + "): ");
+            Integer option = Keyboard.readInt();
+            if (option != null) {
+                authMethodChoose = AUTH_METHOD.ofChoice(option);
+                if (authMethodChoose != null) {
+                    break;
+                }
+            } else {
+                System.out.println("Invalid option specified, try again.");
+            }
+        }
+        this.authMethod = authMethodChoose;
+
+        boolean authWithCognito = true;
+        if (isCnRegion) {
+            authWithCognito = false;
+        } else {
+            authWithCognito = authMethodChoose == AUTH_METHOD.COGNITO_USER_POOL;
+        }
+
+        String emailAddress = null;
+        while (authWithCognito) {
             System.out.print("Enter the email address for your AWS SaaS Boost administrator: ");
             emailAddress = Keyboard.readString();
             if (validateEmail(emailAddress)) {
@@ -270,9 +333,73 @@ public class SaaSBoostInstall {
                 outputMessage("Entered value for email address is incorrect or wrong format, please try again.");
             }
         }
+        this.emailAddress = emailAddress;
 
-        System.out.print("Would you like to install the metrics and analytics module of AWS SaaS Boost (y or n)? ");
-        this.useAnalyticsModule = Keyboard.readBoolean();
+        String oidcIssuer = null;
+        while (!authWithCognito) {
+            System.out.print("Enter the OIDC Issuer: ");
+            oidcIssuer = Keyboard.readString();
+            if (oidcIssuer.startsWith("https://")) {
+                break;
+            } else {
+                outputMessage("Entered value for OIDC issuer is incorrect, please try again.");
+            }
+        }
+        this.oidcIssuer = oidcIssuer;
+
+        String oidcClientId = null;
+        while (!authWithCognito) {
+            System.out.print("Enter the OIDC Client Id: ");
+            oidcClientId = Keyboard.readString();
+            if (oidcClientId.strip().length() > 2) {
+                break;
+            } else {
+                outputMessage("Entered value for OIDC client Id is incorrect, please try again.");
+            }
+        }
+        this.oidcClientId = oidcClientId;
+
+        String oidcAudience = null;
+        while (!authWithCognito && oidcIssuer.indexOf("auth0.com") > 0) {
+            System.out.print("Enter OIDC Audience: ");
+            oidcAudience = Keyboard.readString();
+            if (oidcAudience.strip().length() > 0) {
+                break;
+            } else {
+                outputMessage("Entered value for OIDC audience is incorrect, please try again.");
+            }
+        }
+        this.oidcAudience = oidcAudience;
+
+        String extraOidcScope = null;
+        if (!authWithCognito) {
+            System.out.print("Enter extra OIDC scope for permission: ");
+            extraOidcScope = Keyboard.readString();
+            if (extraOidcScope.strip().length() == 0) {
+                this.oidcScope = "openid";
+            } else {
+                this.oidcScope = "openid " + extraOidcScope;
+            }
+        }
+
+        String domainName = null;
+        while (isCnRegion) {
+            System.out.print("Enter domain name: ");
+            domainName = Keyboard.readString();
+            if (domainName.strip().length() > 0 && !domainName.startsWith("http")) {
+                break;
+            } else {
+                outputMessage("Entered value for domain name is incorrect, please try again.");
+            }
+        }
+        this.domainName = domainName;
+
+        if (isCnRegion) {
+            this.useAnalyticsModule = false;
+        } else {
+            System.out.print("Would you like to install the metrics and analytics module of AWS SaaS Boost (y or n)? ");
+            this.useAnalyticsModule = Keyboard.readBoolean();
+        }
 
         // If installing the analytics module, ask about QuickSight.
         if (useAnalyticsModule) {
@@ -294,7 +421,26 @@ public class SaaSBoostInstall {
         outputMessage("AWS Account: " + this.accountId);
         outputMessage("AWS Region: " + AWS_REGION.toString());
         outputMessage("AWS SaaS Boost Environment Name: " + this.envName);
-        outputMessage("Admin Email Address: " + emailAddress);
+        outputMessage("Authentication Method: " + this.authMethod.value);
+        if (this.emailAddress != null) {
+            outputMessage("Admin Email Address: " + this.emailAddress);
+        }
+        if (this.oidcIssuer != null) {
+            outputMessage("OIDC Issuer: " + this.oidcIssuer);
+        }
+        if (this.oidcClientId != null) {
+            outputMessage("OIDC Client Id: " + this.oidcClientId);
+        }
+        if (this.oidcAudience != null) {
+            outputMessage("OIDC Audience: " + this.oidcAudience);
+        }
+        if (this.domainName != null) {
+            outputMessage("Domain Name: " + this.domainName);
+        }
+        if (this.oidcScope != null) {
+            outputMessage("OIDC scope: " + this.oidcScope);
+        }
+
         outputMessage("Install optional Analytics Module: " + this.useAnalyticsModule);
         if (this.useAnalyticsModule && isNotBlank(this.quickSightUsername)) {
             outputMessage("Amazon QuickSight user for Analytics Module: " + this.quickSightUsername);
@@ -366,7 +512,7 @@ public class SaaSBoostInstall {
         // Run CloudFormation create stack
         outputMessage("Running CloudFormation");
         this.stackName = "sb-" + envName;
-        createSaaSBoostStack(stackName, emailAddress, setupActiveDirectory, activeDirectoryPasswordParameterName);
+        createSaaSBoostStack(stackName, setupActiveDirectory, activeDirectoryPasswordParameterName);
 
         // TODO if we capture the create complete event for the web bucket from the main SaaS Boost stack
         // we could pop a message in a queue that we could listen to here and trigger the website build
@@ -748,8 +894,8 @@ public class SaaSBoostInstall {
             } else {
                 // Make sure we got a valid AWS region string
                 quickSightRegion = Region.regions().stream().filter(request -> request
-                        .id()
-                        .equals(quickSightAccountRegion))
+                                .id()
+                                .equals(quickSightAccountRegion))
                         .findAny()
                         .orElse(null);
             }
@@ -1050,8 +1196,8 @@ public class SaaSBoostInstall {
                 )
                 .permissions(ResourcePermission.builder()
                         .principal(this.quickSightUserArn)
-                        .actions("quicksight:DescribeDataSource","quicksight:DescribeDataSourcePermissions",
-                                "quicksight:PassDataSource","quicksight:UpdateDataSource","quicksight:DeleteDataSource",
+                        .actions("quicksight:DescribeDataSource", "quicksight:DescribeDataSourcePermissions",
+                                "quicksight:PassDataSource", "quicksight:UpdateDataSource", "quicksight:DeleteDataSource",
                                 "quicksight:UpdateDataSourcePermissions")
                         .build()
                 )
@@ -1071,9 +1217,9 @@ public class SaaSBoostInstall {
         List<InputColumn> inputColumns = new ArrayList<>();
         Stream.of("type", "workload", "context", "tenant_id", "tenant_name", "tenant_tier", "metric_name", "metric_unit", "meta_data")
                 .map(column -> InputColumn.builder()
-                                .name(column)
-                                .type(InputColumnDataType.STRING)
-                                .build()
+                        .name(column)
+                        .type(InputColumnDataType.STRING)
+                        .build()
                 )
                 .forEachOrdered(inputColumns::add);
         inputColumns.add(InputColumn.builder()
@@ -1109,10 +1255,10 @@ public class SaaSBoostInstall {
                 .importMode(DataSetImportMode.DIRECT_QUERY)
                 .permissions(ResourcePermission.builder()
                         .principal(this.quickSightUserArn)
-                        .actions("quicksight:DescribeDataSet","quicksight:DescribeDataSetPermissions",
-                                "quicksight:PassDataSet","quicksight:DescribeIngestion","quicksight:ListIngestions",
-                                "quicksight:UpdateDataSet","quicksight:DeleteDataSet","quicksight:CreateIngestion",
-                                "quicksight:CancelIngestion","quicksight:UpdateDataSetPermissions")
+                        .actions("quicksight:DescribeDataSet", "quicksight:DescribeDataSetPermissions",
+                                "quicksight:PassDataSet", "quicksight:DescribeIngestion", "quicksight:ListIngestions",
+                                "quicksight:UpdateDataSet", "quicksight:DeleteDataSet", "quicksight:CreateIngestion",
+                                "quicksight:CancelIngestion", "quicksight:UpdateDataSetPermissions")
                         .build()
                 )
                 .tags(Tag.builder()
@@ -1439,7 +1585,7 @@ public class SaaSBoostInstall {
             outputMessage("Uploading " + sourceDirectories.size() + " Lambda functions to S3");
             for (Path sourceDirectory : sourceDirectories) {
                 if (Files.exists(sourceDirectory.resolve("pom.xml"))) {
-                    executeCommand("mvn", null, sourceDirectory.toFile());
+                    // executeCommand("mvn", null, sourceDirectory.toFile());
                     final Path targetDir = sourceDirectory.resolve("target");
                     try (Stream<Path> stream = Files.list(targetDir)) {
                         Set<Path> lambdaSourcePackage = stream
@@ -1462,17 +1608,34 @@ public class SaaSBoostInstall {
         }
     }
 
-    protected void createSaaSBoostStack(final String stackName, String adminEmail, Boolean useActiveDirectory, String activeDirectoryPasswordParam) {
+    protected void createSaaSBoostStack(final String stackName,
+                                        Boolean useActiveDirectory, String activeDirectoryPasswordParam) {
         // Note - most params the default is used from the CloudFormation stack
         List<Parameter> templateParameters = new ArrayList<>();
         templateParameters.add(Parameter.builder().parameterKey("Environment").parameterValue(envName).build());
-        templateParameters.add(Parameter.builder().parameterKey("AdminEmailAddress").parameterValue(adminEmail).build());
+        if (this.authMethod == AUTH_METHOD.COGNITO_USER_POOL) {
+            String adminEmail = this.emailAddress;
+            templateParameters.add(Parameter.builder().parameterKey("AdminEmailAddress").parameterValue(adminEmail).build());
+        }
+        if (this.authMethod == AUTH_METHOD.OIDC) {
+            templateParameters.add(Parameter.builder().parameterKey("OIDCIssuer").parameterValue(this.oidcIssuer).build());
+        }
+        if (this.domainName != null) {
+            templateParameters.add(Parameter.builder().parameterKey("DomainName").parameterValue(this.domainName).build());
+        }
+        if (this.oidcScope != null) {
+            templateParameters.add(Parameter.builder().parameterKey("OIDCScope").parameterValue(this.oidcScope).build());
+        }
+
+        templateParameters.add(Parameter.builder().parameterKey("AuthMethod").parameterValue(this.authMethod.value).build());
         templateParameters.add(Parameter.builder().parameterKey("SaaSBoostBucket").parameterValue(saasBoostArtifactsBucket.getBucketName()).build());
         templateParameters.add(Parameter.builder().parameterKey("Version").parameterValue(VERSION).build());
         templateParameters.add(Parameter.builder().parameterKey("DeployActiveDirectory").parameterValue(useActiveDirectory.toString()).build());
         templateParameters.add(Parameter.builder().parameterKey("ADPasswordParam").parameterValue(activeDirectoryPasswordParam).build());
 
         LOGGER.info("createSaaSBoostStack::create stack " + stackName);
+        LOGGER.info("createSaaSBoostStack::authMethod " + authMethod);
+        LOGGER.info("createSaaSBoostStack::templateURL " + saasBoostArtifactsBucket.getBucketUrl() + "saas-boost.yaml");
         String stackId = null;
         try {
             CreateStackResponse cfnResponse = cfn.createStack(CreateStackRequest.builder()
@@ -1709,6 +1872,8 @@ public class SaaSBoostInstall {
             System.exit(2);
         }
 
+        boolean isAuthWithCognito = AUTH_METHOD.COGNITO_USER_POOL == this.authMethod;
+
         /*
         REACT_APP_SIGNOUT_URI saas-boost::${ENVIRONMENT}-${AWS_REGION}:webUrl
         REACT_APP_CALLBACK_URI saas-boost::${ENVIRONMENT}-${AWS_REGION}:webUrl
@@ -1758,6 +1923,7 @@ public class SaaSBoostInstall {
 
         // Execute yarn build to generate the React app
         outputMessage("Start build of AWS SaaS Boost React web application with yarn...");
+        Path yarnBuildDir = webDir.resolve(Path.of("build"));
         ProcessBuilder pb;
         Process process = null;
         try {
@@ -1769,11 +1935,26 @@ public class SaaSBoostInstall {
 
             Map<String, String> env = pb.environment();
             pb.directory(webDir.toFile());
-            env.put("REACT_APP_SIGNOUT_URI", webUrl);
-            env.put("REACT_APP_CALLBACK_URI", webUrl);
-            env.put("REACT_APP_COGNITO_USERPOOL", exportsMap.get(prefix + "userPoolId"));
-            env.put("REACT_APP_CLIENT_ID", exportsMap.get(prefix + "userPoolClientId"));
-            env.put("REACT_APP_COGNITO_USERPOOL_BASE_URI", exportsMap.get(prefix + "cognitoBaseUri"));
+            if (isAuthWithCognito) {
+                env.put("REACT_APP_AUTH_METHOD", AUTH_METHOD.COGNITO_USER_POOL.value);
+                env.put("REACT_APP_SIGNOUT_URI", webUrl);
+                env.put("REACT_APP_CALLBACK_URI", webUrl);
+                env.put("REACT_APP_COGNITO_USERPOOL", exportsMap.get(prefix + "userPoolId"));
+                env.put("REACT_APP_CLIENT_ID", exportsMap.get(prefix + "userPoolClientId"));
+                env.put("REACT_APP_COGNITO_USERPOOL_BASE_URI", exportsMap.get(prefix + "cognitoBaseUri"));
+            } else {
+                env.put("REACT_APP_AUTH_METHOD", AUTH_METHOD.OIDC.value);
+                env.put("REACT_APP_CALLBACK_URI", webUrl + "/callback");
+                env.put("REACT_APP_OIDC_CLIENT_ID", this.oidcClientId);
+                env.put("REACT_APP_OIDC_ISSUER", this.oidcIssuer);
+                if (this.oidcAudience != null) {
+                    env.put("REACT_APP_OIDC_AUDIENCE", this.oidcAudience);
+                }
+                env.put("REACT_APP_OIDC_SCOPE", this.oidcScope);
+
+
+            }
+            env.put("REACT_APP_WEB_URI", webUrl);
             env.put("REACT_APP_API_URI", exportsMap.get(prefix + "publicApiUrl"));
             env.put("REACT_APP_AWS_ACCOUNT", accountId);
             env.put("REACT_APP_ENVIRONMENT", envName);
@@ -1787,6 +1968,20 @@ public class SaaSBoostInstall {
                 throw new RuntimeException("Error building web application. Verify version of Node is correct.");
             }
             outputMessage("Completed build of AWS SaaS Boost React web application.");
+
+            Map<String, String> envConfig = new HashMap<>();
+            for(Map.Entry<String, String> ele: env.entrySet()) {
+                if(ele.getKey().startsWith("REACT_APP")){
+                    envConfig.put(ele.getKey(), ele.getValue());
+                }
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            Path envJsonConfigFile = Path.of(yarnBuildDir.toString(), "envConfig.json");
+            try (FileOutputStream fileOutputStream = new FileOutputStream(envJsonConfigFile.toFile())) {
+                mapper.writeValue(fileOutputStream, envConfig);
+            }
+            LOGGER.info("wrote file: " + envJsonConfigFile);
+
         } catch (IOException | InterruptedException e) {
             LOGGER.error(getFullStackTrace(e));
         } finally {
@@ -1800,7 +1995,6 @@ public class SaaSBoostInstall {
         // First, clear out any files that are currently in the web bucket
         cleanUpS3(webBucket, "");
         String cacheControl = null;
-        Path yarnBuildDir = webDir.resolve(Path.of("build"));
         List<Path> filesToUpload;
         try (Stream<Path> stream = Files.walk(yarnBuildDir)) {
             filesToUpload = stream.filter(Files::isRegularFile).collect(Collectors.toList());
@@ -2077,6 +2271,7 @@ public class SaaSBoostInstall {
 
     /**
      * Generate a random password that matches the password policy of the Cognito user pool
+     *
      * @return a random password that matches the password policy of the Cognito user pool
      */
     public static String generatePassword(int passwordLength) {
@@ -2112,5 +2307,12 @@ public class SaaSBoostInstall {
             password.append(chars[characterBucket][random.nextInt(chars[characterBucket].length)]);
         }
         return password.toString();
+    }
+
+    public static String getAwsPartition() {
+        if (AWS_REGION.toString().startsWith("cn-")) {
+            return "aws-cn";
+        }
+        return "aws";
     }
 }

@@ -54,7 +54,11 @@ public class SaaSBoostArtifactsBucket {
      * @return the S3 URL the Bucket object represents
      */
     public String getBucketUrl() {
-        return String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
+        String urlSuffix = "amazonaws.com";
+        if (this.region.toString().startsWith("cn-")) {
+            urlSuffix = "amazonaws.com.cn";
+        }
+        return String.format("https://%s.s3.%s.%s/", bucketName, region, urlSuffix);
     }
 
     public void putFile(S3Client s3, Path localPath, Path remotePath) {
@@ -101,6 +105,7 @@ public class SaaSBoostArtifactsBucket {
                                     .build())
                             .build())
                     .build());
+            String awsPartition = SaaSBoostInstall.getAwsPartition();
             s3.putBucketPolicy(PutBucketPolicyRequest.builder()
                     .policy("{\n"
                             + "    \"Version\": \"2012-10-17\",\n"
@@ -111,8 +116,8 @@ public class SaaSBoostArtifactsBucket {
                             + "            \"Principal\": \"*\",\n"
                             + "            \"Action\": \"s3:*\",\n"
                             + "            \"Resource\": [\n"
-                            + "                \"arn:aws:s3:::" + s3ArtifactBucketName + "/*\",\n"
-                            + "                \"arn:aws:s3:::" + s3ArtifactBucketName + "\"\n"
+                            + "                \"arn:" + awsPartition + ":s3:::" + s3ArtifactBucketName + "/*\",\n"
+                            + "                \"arn:" + awsPartition + ":s3:::" + s3ArtifactBucketName + "\"\n"
                             + "            ],\n"
                             + "            \"Condition\": {\n"
                             + "                \"Bool\": {\n"

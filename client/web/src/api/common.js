@@ -16,6 +16,8 @@
 
 import { Auth } from 'aws-amplify'
 import axios from 'axios'
+import { OIDC_AUTH_METHOD, OIDC_STORAGE_USER_KEY } from '../components/Auth/OIDC/AppWithOidc'
+import config from '../config/appConfig'
 import appConfig from '../config/appConfig'
 const { apiUri } = appConfig
 
@@ -48,6 +50,11 @@ export const handleErrorNoResponse = (response) => {
 }
 
 export async function fetchAccessToken() {
+  if (config.authMethod == OIDC_AUTH_METHOD) {
+    const userInfo = sessionStorage.getItem(OIDC_STORAGE_USER_KEY)
+    return 'Bearer ' + JSON.parse(userInfo).access_token
+  }
+
   try {
     const authSession = await Auth.currentSession()
     const accessToken = authSession.getAccessToken()
