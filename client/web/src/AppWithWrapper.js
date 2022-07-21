@@ -17,7 +17,7 @@ export const AppWithAuthWrapper = () => {
     client_id: appConfig.oidcClientId,
     redirect_uri: window.location.origin,
   }
-
+  
   return (
     <AuthProvider {...oidcConfig}>
       <AppWithOidc />

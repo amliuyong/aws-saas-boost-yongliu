@@ -14,6 +14,20 @@ import { Redirect } from 'react-router-dom'
 export function OidcSignIn({ signOutReason }) {
   const auth = useAuth()
 
+  const signInHandler = () => {
+    const sigInProps = { scope: 'openid profile email' }
+
+    if (process.env.REACT_APP_OIDC_SCOPE) {
+      sigInProps.scope = process.env.REACT_APP_OIDC_SCOPE
+    }
+    if (process.env.REACT_APP_OIDC_AUDIENCE) {
+      sigInProps.extraQueryParams = {
+        audience: process.env.REACT_APP_OIDC_AUDIENCE,
+      }
+    }
+    auth.signinRedirect(sigInProps)
+  }
+
   return (
     <Fragment>
       <div className="app d-flex min-vh-100 align-items-center bg-light">
@@ -36,13 +50,7 @@ export function OidcSignIn({ signOutReason }) {
                             color="primary"
                             className="px-4"
                             type="button"
-                            onClick={() =>
-                              void auth.signinRedirect({
-                                scope: process.env.REACT_APP_OIDC_SCOPE
-                                  ? process.env.REACT_APP_OIDC_SCOPE
-                                  : 'openid',
-                              })
-                            }
+                            onClick={signInHandler}
                           >
                             Login
                           </Button>

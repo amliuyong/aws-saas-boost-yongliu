@@ -43,6 +43,7 @@ export const AppWithOidc = () => {
   }
 
   if (auth.isAuthenticated) {
+    console.log("auth.user", auth.user);
     saveUserInfo(auth.user)
     return (
       <Fragment>
