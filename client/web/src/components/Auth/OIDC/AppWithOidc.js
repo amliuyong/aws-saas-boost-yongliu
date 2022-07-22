@@ -3,9 +3,19 @@ import { useAuth } from 'react-oidc-context'
 import { OidcSignIn } from './OidcSignIn'
 import App from '../../../App'
 import IdleTimer from 'react-idle-timer'
+import { Amplify, Auth } from 'aws-amplify'
+import appConfig from '../../../config/appConfig'
+import { S3Client, ListObjectsCommand } from '@aws-sdk/client-s3'
 
 export const OIDC_STORAGE_USER_KEY = 'OidcUserInfo'
 export const OIDC_AUTH_METHOD = 'OIDC'
+
+Amplify.configure({
+  Auth: {
+    region: 'cn-north-1',
+    identityPoolId: 'cn-north-1:120dbded-ff14-4002-9744-df884f2908b1',
+  },
+})
 
 export const AppWithOidc = () => {
   const [signOutReason, setSignOutReason] = useState()
@@ -42,9 +52,49 @@ export const AppWithOidc = () => {
     sessionStorage.removeItem(OIDC_STORAGE_USER_KEY)
   }
 
+  const federatedSignInWithCognito = (auth0User) => {
+    const idToken = auth0User.id_token
+    const expires_at = auth0User.expires_at * 1000
+    const name = auth0User.profile.name
+    const email = auth0User.profile.email
+    const domain = appConfig.oidcIssuer.replace('https://', '')
+
+    Auth.federatedSignIn(
+      domain,
+      {
+        token: idToken,
+        expires_at,
+      },
+      {
+        name,
+        email,
+      }
+    ).then((cred) => {
+      console.log('federatedSignIn.cred', cred)
+      const s3Client = new S3Client({
+        region: 'cn-north-1',
+        credentials: cred,
+      })
+      const command = new ListObjectsCommand({
+        Bucket: 'yongliu-cn-bj',
+      })
+
+      s3Client
+        .send(command)
+        .then((data) => {
+          console.log('data', data)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    })
+  }
+
   if (auth.isAuthenticated) {
-    console.log("auth.user", auth.user);
+    console.log('auth.user', auth.user)
     saveUserInfo(auth.user)
+    federatedSignInWithCognito(auth.user)
+
     return (
       <Fragment>
         <Suspense fallback={loading()}>
