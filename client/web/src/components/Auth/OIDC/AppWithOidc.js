@@ -1,7 +1,7 @@
-import React, { Fragment, Suspense, useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { OidcSignIn } from './OidcSignIn'
-import { Amplify, Auth } from 'aws-amplify'
+import { Amplify, Auth, Storage } from 'aws-amplify'
 import appConfig from '../../../config/appConfig'
 import { S3Client, ListObjectsCommand } from '@aws-sdk/client-s3'
 
@@ -13,11 +13,18 @@ Amplify.configure({
     region: 'cn-north-1',
     identityPoolId: 'cn-north-1:120dbded-ff14-4002-9744-df884f2908b1',
   },
+  Storage: {
+    AWSS3: {
+      bucket: 'yongliu-cn-bj',
+      region: 'cn-north-1',
+    },
+  },
 })
 
 export const AppWithOidc = () => {
   const [signOutReason, setSignOutReason] = useState()
   const [s3Objects, setS3Objects] = useState([])
+  const [downloadUrl, setDownloadUrl] = useState('')
 
   const auth = useAuth()
   const timeout = Number(process.env.REACT_APP_TIMEOUT) || 600000
@@ -26,16 +33,6 @@ export const AppWithOidc = () => {
   const loading = () => (
     <div className="animated fadeIn pt-1 text-center">Loading...</div>
   )
-
-  const onIdle = async () => {
-    try {
-      const signOutReason = `Session closed due to ${minutes} minutes of inactivity.`
-      setSignOutReason(signOutReason)
-      return auth.removeUser()
-    } catch (e) {
-      // do nothing
-    }
-  }
 
   if (auth.isLoading) {
     return <div>{loading()}</div>
@@ -96,6 +93,22 @@ export const AppWithOidc = () => {
     })
   }
 
+  const downloadFileUrl = async () => {
+    const fileName = 'test/README.md'
+    //const fileName = 'user/user.csv'
+    const signedURL = await Storage.get(fileName, {
+      level: 'public',
+    })
+    //alert(signedURL)
+    setDownloadUrl(signedURL)
+  }
+
+  const uploadFile = async () => {
+    const time = new Date().getTime()
+    const result = await Storage.put(`Hello-${time}.txt`, 'Hello')
+    alert('upload successfully, ' + JSON.stringify(result))
+  }
+
   if (auth.isAuthenticated) {
     console.log('auth.user', auth.user)
     saveUserInfo(auth.user)
@@ -111,6 +124,20 @@ export const AppWithOidc = () => {
         <button onClick={showMyBucketHandler}>
           Show Objects in Bucket: 'yongliu-cn-bj'
         </button>
+
+        <button onClick={downloadFileUrl}>Get Download File Link</button>
+
+        <p>
+          {downloadUrl && (
+            <a href={downloadUrl} target="_blank">
+              Download
+            </a>
+          )}
+        </p>
+
+        <p>
+          <button onClick={uploadFile}>Upload Test</button>
+        </p>
       </Fragment>
     )
   } else {
