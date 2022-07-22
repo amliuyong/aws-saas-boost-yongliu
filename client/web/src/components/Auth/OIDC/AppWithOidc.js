@@ -1,8 +1,6 @@
 import React, { Fragment, Suspense, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { OidcSignIn } from './OidcSignIn'
-import App from '../../../App'
-import IdleTimer from 'react-idle-timer'
 import { Amplify, Auth } from 'aws-amplify'
 import appConfig from '../../../config/appConfig'
 import { S3Client, ListObjectsCommand } from '@aws-sdk/client-s3'
@@ -19,6 +17,7 @@ Amplify.configure({
 
 export const AppWithOidc = () => {
   const [signOutReason, setSignOutReason] = useState()
+  const [s3Objects, setS3Objects] = useState([])
 
   const auth = useAuth()
   const timeout = Number(process.env.REACT_APP_TIMEOUT) || 600000
@@ -71,10 +70,16 @@ export const AppWithOidc = () => {
       }
     ).then((cred) => {
       console.log('federatedSignIn.cred', cred)
+    })
+  }
+
+  const showMyBucketHandler = () => {
+    Auth.currentCredentials().then((credentials) => {
       const s3Client = new S3Client({
         region: 'cn-north-1',
-        credentials: cred,
+        credentials: credentials,
       })
+
       const command = new ListObjectsCommand({
         Bucket: 'yongliu-cn-bj',
       })
@@ -83,6 +88,7 @@ export const AppWithOidc = () => {
         .send(command)
         .then((data) => {
           console.log('data', data)
+          setS3Objects(data.Contents)
         })
         .catch((err) => {
           console.log(err)
@@ -97,10 +103,14 @@ export const AppWithOidc = () => {
 
     return (
       <Fragment>
-        <Suspense fallback={loading()}>
-          <App authState={'signedIn'} oidcAuth={auth} />
-        </Suspense>
-        <IdleTimer onIdle={onIdle} debounce={250} timeout={timeout} />
+        <ul>
+          {s3Objects.map((obj) => {
+            return <li key={obj.ID}>{obj.Key}</li>
+          })}
+        </ul>
+        <button onClick={showMyBucketHandler}>
+          Show Objects in Bucket: 'yongliu-cn-bj'
+        </button>
       </Fragment>
     )
   } else {
