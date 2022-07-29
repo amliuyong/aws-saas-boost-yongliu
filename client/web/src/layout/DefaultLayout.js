@@ -16,17 +16,18 @@
 // Based on CoreUI Template https://github.com/coreui/coreui-free-react-admin-template
 // SPDX-LicenseIdentifier: MIT
 import React, { Component, Suspense } from 'react'
-import { Auth } from 'aws-amplify'
 import { withRouter } from 'react-router-dom'
 import * as router from 'react-router-dom'
-import { AppContent, AppSidebar, AppFooter, AppHeader } from '../components/index'
+import {
+  AppContent,
+  AppSidebar,
+  AppFooter,
+  AppHeader,
+} from '../components/index'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 // sidebar nav config
 import navigation from '../_nav'
-const SaasBoostChangePassword = React.lazy(() =>
-  import('../components/Auth/SaasBoostChangePassword1'),
-)
 
 const mapStateToProps = (state) => {
   return { settings: state.settings, setup: state.settings.setup }
@@ -35,63 +36,38 @@ const mapStateToProps = (state) => {
 class DefaultLayout extends Component {
   constructor(props) {
     super(props)
+
+    this.oidcAuth = props.oidcAuth
     this.state = {
-      showChangePassword: false,
-      user: undefined,
+      user: this.oidcAuth.user,
     }
 
     this.handleSignOut = this.handleSignOut.bind(this)
     this.handleProfileClick = this.handleProfileClick.bind(this)
-    this.showChangePassword = this.showChangePassword.bind(this)
-    this.closeChangePassword = this.closeChangePassword.bind(this)
-  }
-
-  async componentDidMount() {
-    const user = await Auth.currentUserInfo()
-    this.setState((state, props) => {
-      return {
-        user: user,
-      }
-    })
   }
 
   handleSignOut = async () => {
-    await Auth.signOut()
+    await this.oidcAuth.removeUser()
   }
 
   handleProfileClick = () => {
     const { history } = this.props
     try {
-      const userInfo = this.state.user
-      console.log(userInfo)
-      history.push(`/users/${userInfo.username}`)
+      const username = this.state.user.profile['cognito:username']
+      history.push(`/users/${username}`)
       console.log(history)
     } catch (err) {
       console.error(err)
     }
   }
 
-  showChangePassword = () => {
-    this.setState((state) => {
-      return {
-        showChangePassword: true,
-      }
-    })
-  }
-
-  closeChangePassword = () => {
-    this.setState((state) => {
-      return {
-        showChangePassword: false,
-      }
-    })
-  }
-
-  loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
-
+  loading = () => (
+    <div className="animated fadeIn pt-1 text-center">Loading...</div>
+  )
   render() {
-    const { showChangePassword, user } = this.state
+    const { user } = this.state
     const { setup } = this.props
+   
     if (!setup) {
       navigation.forEach((nav) => {
         if (nav.name === 'Application') {
@@ -107,15 +83,23 @@ class DefaultLayout extends Component {
         }
       })
     }
+
+    let handleProfileClickFunction = null
+    let filteredNavigation = navigation
+    if (user.profile['cognito:username']) {
+      handleProfileClickFunction = this.handleProfileClick
+    } else {
+      filteredNavigation = navigation.filter((nav) => nav.name !== 'Users')
+    }
+
     return (
       <div>
-        <AppSidebar navigation={navigation} />
+        <AppSidebar navigation={filteredNavigation} />
         <div className="wrapper d-flex flex-column min-vw-100 min-vh-100 bg-light">
           <Suspense fallback={this.loading()}>
             <AppHeader
               onLogout={this.handleSignOut}
-              handleProfileClick={this.handleProfileClick}
-              handleChangePasswordClick={this.showChangePassword}
+              handleProfileClick={handleProfileClickFunction}
               user={user}
               router={router}
             />
@@ -124,10 +108,6 @@ class DefaultLayout extends Component {
             <AppContent />
           </div>
           <AppFooter />
-          <SaasBoostChangePassword
-            show={showChangePassword}
-            handleClose={this.closeChangePassword}
-          />
         </div>
       </div>
     )

@@ -18,9 +18,25 @@ import 'core-js'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import AppWithAuth from './AppWithAuth'
+import appConfig from './config/appConfig'
+import { AuthProvider } from 'react-oidc-context'
 import * as serviceWorker from './serviceWorker'
 
-ReactDOM.render(<AppWithAuth />, document.getElementById('root'))
+
+const oidcConfig = {
+    authority: appConfig.oidcIssuer,
+    client_id: appConfig.oidcClientId,
+    redirect_uri: window.location.origin,
+  }
+
+console.log('oidcConfig', oidcConfig)
+
+ReactDOM.render(
+  <AuthProvider {...oidcConfig}>
+    <AppWithAuth />
+  </AuthProvider>,
+  document.getElementById('root')
+)
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -22,6 +22,12 @@ const config = {
   apiUri: process.env.REACT_APP_API_URI,
   environment: process.env.REACT_APP_ENVIRONMENT,
   awsAccount: process.env.REACT_APP_AWS_ACCOUNT,
+
+  authMethod: process.env.REACT_APP_AUTH_METHOD,
+  oidcClientId: process.env.REACT_APP_OIDC_CLIENT_ID,
+  oidcIssuer: process.env.REACT_APP_OIDC_ISSUER,
+  oidcScope: process.env.REACT_APP_OIDC_SCOPE,
+  
 }
 
 export default config

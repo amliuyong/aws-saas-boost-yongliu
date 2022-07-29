@@ -24,28 +24,49 @@ import {
   CDropdownMenu,
   CDropdownToggle,
 } from '@coreui/react'
-import { cilLockLocked, cilSettings, cilShieldAlt, cilUser } from '@coreui/icons'
+import {
+  cilLockLocked,
+  cilSettings,
+  cilShieldAlt,
+  cilUser,
+} from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 
 const AppHeaderDropdown = (props) => {
-  const { handleProfileClick, handleChangePasswordClick, onLogout, user } = props
+  const {
+    handleProfileClick,
+    onLogout,
+    user,
+  } = props
+
+  console.log('AppHeaderDropdown', user)
+  let userName = user?.profile['cognito:username']
+  if (!userName) {
+    userName = user?.profile?.username
+  }
+  if (!userName) {
+    userName = user?.profile.name
+  }
+  if (!userName) {
+    userName = user?.profile?.email
+  }
+
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0" caret={false}>
         <span className="mx-2">
-          <CIcon icon={cilUser} className="me-2" /> {user?.username}
+          <CIcon icon={cilUser} className="me-2" /> {userName}
         </span>
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
         <CDropdownHeader className="bg-light fw-semibold py-2">
           <CIcon icon={cilSettings} className="me-2" /> Settings
         </CDropdownHeader>
-        <CDropdownItem href="#" onClick={() => handleProfileClick()}>
-          <CIcon icon={cilUser} className="me-2" /> Profile
-        </CDropdownItem>
-        <CDropdownItem href="#" onClick={() => handleChangePasswordClick()}>
-          <CIcon icon={cilShieldAlt} className="me-2" /> Change Password
-        </CDropdownItem>
+        {handleProfileClick && (
+          <CDropdownItem href="#" onClick={() => handleProfileClick()}>
+            <CIcon icon={cilUser} className="me-2" /> Profile
+          </CDropdownItem>
+        )}
         <CDropdownItem href="#" onClick={() => onLogout()}>
           <CIcon icon={cilLockLocked} className="me-2" /> Sign Out
         </CDropdownItem>
