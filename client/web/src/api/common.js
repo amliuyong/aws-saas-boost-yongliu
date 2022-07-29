@@ -16,9 +16,10 @@
 
 
 import axios from 'axios'
-import { OIDC_STORAGE_USER_KEY } from '../AppWithAuth'
 import appConfig from '../config/appConfig'
 const { apiUri } = appConfig
+
+const OIDC_STORAGE_USER_KEY = "aws-saas-boost-userinfo"
 
 export const handleErrorResponse = async (response) => {
   if (!response.ok) {
@@ -49,8 +50,16 @@ export const handleErrorNoResponse = (response) => {
 }
 
 export async function fetchAccessToken() {
-  const userInfo = sessionStorage.getItem(OIDC_STORAGE_USER_KEY)
+  const userInfo = localStorage.getItem(OIDC_STORAGE_USER_KEY)
   return 'Bearer ' + JSON.parse(userInfo).access_token
+}
+
+export const saveUserInfo = (user) => {
+  localStorage.setItem(OIDC_STORAGE_USER_KEY, JSON.stringify(user))
+}
+
+export const removeUserInfo = () => {
+  localStorage.removeItem(OIDC_STORAGE_USER_KEY)
 }
 
 //API Aborted class
