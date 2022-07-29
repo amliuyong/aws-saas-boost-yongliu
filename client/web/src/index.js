@@ -24,8 +24,8 @@ import * as serviceWorker from './serviceWorker'
 
 
 const oidcConfig = {
-    authority: appConfig.oidcIssuer,
-    client_id: appConfig.oidcClientId,
+    authority: appConfig.authIssuer,
+    client_id: appConfig.clientId,
     redirect_uri: window.location.origin,
   }
 

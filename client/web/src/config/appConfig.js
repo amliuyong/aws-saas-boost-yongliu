@@ -16,18 +16,15 @@
 
 const config = {
   region: process.env.REACT_APP_AWS_REGION,
-  userPool: process.env.REACT_APP_COGNITO_USERPOOL,
-  userPoolBaseUri: process.env.REACT_APP_COGNITO_USERPOOL_BASE_URI,
-  clientId: process.env.REACT_APP_CLIENT_ID,
   apiUri: process.env.REACT_APP_API_URI,
   environment: process.env.REACT_APP_ENVIRONMENT,
   awsAccount: process.env.REACT_APP_AWS_ACCOUNT,
-
-  authMethod: process.env.REACT_APP_AUTH_METHOD,
-  oidcClientId: process.env.REACT_APP_OIDC_CLIENT_ID,
-  oidcIssuer: process.env.REACT_APP_OIDC_ISSUER,
-  oidcScope: process.env.REACT_APP_OIDC_SCOPE,
   
+  clientId: process.env.REACT_APP_CLIENT_ID,
+  authMethod: process.env.REACT_APP_AUTH_METHOD,
+  authIssuer: process.env.REACT_APP_AUTH_ISSUER,
+  authScope: process.env.REACT_APP_AUTH_SCOPE,
+
 }
 
 export default config
