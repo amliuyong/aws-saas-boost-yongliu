@@ -14,7 +14,18 @@ import { Redirect } from 'react-router-dom'
 import config from '../../config/appConfig'
 export default function OidcSignIn({ signOutReason }) {
   const auth = useAuth()
-  console.log("authScope", config.authScope)
+
+  const signInClickHandler = () => {
+    const signInParams = {
+      scope: config.authScope ? config.authScope : 'openid profile email',
+    }
+    if (config.authAudience) {
+      signInParams['extraQueryParams'] = { audience: config.authAudience }
+    }
+    console.log('signInParams', signInParams)
+    auth.signinRedirect(signInParams)
+  }
+
   return (
     <Fragment>
       <div className="app d-flex min-vh-100 align-items-center bg-light">
@@ -37,11 +48,7 @@ export default function OidcSignIn({ signOutReason }) {
                             color="primary"
                             className="px-4"
                             type="button"
-                            onClick={() =>
-                               auth.signinRedirect({
-                                scope: config.authScope ? config.authScope : 'openid profile email',
-                              })
-                            }
+                            onClick={signInClickHandler}
                           >
                             Login
                           </Button>

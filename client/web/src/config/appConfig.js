@@ -24,6 +24,7 @@ const config = {
   authMethod: process.env.REACT_APP_AUTH_METHOD,
   authIssuer: process.env.REACT_APP_AUTH_ISSUER,
   authScope: process.env.REACT_APP_AUTH_SCOPE,
+  authAudience: process.env.REACT_APP_AUTH_AUDIENCE,
 
 }
 

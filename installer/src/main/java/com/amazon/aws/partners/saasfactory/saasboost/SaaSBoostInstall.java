@@ -349,6 +349,18 @@ public class SaaSBoostInstall {
         }
 
         while (this.authMethod == AUTH_METHOD.OIDC) {
+            System.out.print("Enter client Id: ");
+            String input = Keyboard.readString();
+            if (input.length() > 0) {
+                this.oidcClientId = input;
+                paramMap.put("oidcClientId", this.oidcClientId);
+                break;
+            } else {
+                outputMessage("Entered value for client Id incorrect or wrong format, please try again.");
+            }
+        }
+
+        while (this.authMethod == AUTH_METHOD.OIDC) {
             System.out.print("Enter permissions required in token claims (enter 'none' to ignore): ");
             String input = Keyboard.readString();
             if (input.contains("=")) {
@@ -360,18 +372,6 @@ public class SaaSBoostInstall {
                 break;
             } else {
                 outputMessage("Entered value for permissions incorrect or wrong format, please try again.");
-            }
-        }
-
-        while (this.authMethod == AUTH_METHOD.OIDC) {
-            System.out.print("Enter client Id: ");
-            String input = Keyboard.readString();
-            if (input.length() > 0) {
-                this.oidcClientId = input;
-                paramMap.put("oidcClientId", this.oidcClientId);
-                break;
-            } else {
-                outputMessage("Entered value for client Id incorrect or wrong format, please try again.");
             }
         }
 
@@ -1969,7 +1969,7 @@ public class SaaSBoostInstall {
                 String auth0AudienceParam = null;
                 if (installerParams.has("auth0Audience")) {
                     auth0AudienceParam = installerParams.get("auth0Audience").asText();
-                    env.put("REACT_APP_OIDC_AUDIENCE", auth0AudienceParam);
+                    env.put("REACT_APP_AUTH_AUDIENCE", auth0AudienceParam);
                 }
             } else {
                 String userPoolId = exportsMap.get(prefix + "userPoolId");
