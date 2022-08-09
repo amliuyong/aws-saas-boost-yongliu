@@ -533,7 +533,7 @@ public class SaaSBoostInstall {
     }
 
    private void saveInstallerParameters(Map<String, String> installParam) {
-       final String installerParameterName = "/saas-boost/" + envName + "/INSTALLER";
+       final String installerParameterName = "/saas-boost/" + envName + "/INSTALLER_PARAMS";
        ObjectMapper objectMapper = new ObjectMapper();
        try {
            String value = objectMapper.writeValueAsString(installParam);
@@ -550,7 +550,7 @@ public class SaaSBoostInstall {
    }
 
    private JsonNode getInstallerParameters() {
-       final String installerParameterName = "/saas-boost/" + envName + "/INSTALLER";
+       final String installerParameterName = "/saas-boost/" + envName + "/INSTALLER_PARAMS";
        ObjectMapper objectMapper = new ObjectMapper();
        GetParameterResponse response = ssm.getParameter(GetParameterRequest.builder()
                        .name(installerParameterName)
@@ -728,7 +728,8 @@ public class SaaSBoostInstall {
             ssm.deleteParameters(request -> request.names(
                     "/saas-boost/" + this.envName + "/ACTIVE_DIRECTORY_PASSWORD",
                     "/saas-boost/" + this.envName + "/METRICS_ANALYTICS_DEPLOYED",
-                    "/saas-boost/" + this.envName + "/REDSHIFT_MASTER_PASSWORD"
+                    "/saas-boost/" + this.envName + "/REDSHIFT_MASTER_PASSWORD",
+                    "/saas-boost/" + this.envName + "/INSTALLER_PARAMS"
             ));
         } catch (SdkServiceException ssmError) {
             outputMessage("Failed to delete all Parameter Store entries");
