@@ -37,6 +37,7 @@ Parameters:
   CognitoUserPoolId:
     Description: User Pool Id for the Cognito Authorizer
     Type: String
+    Default: ''
   BillingServiceGetPlans:
     Description: Billing Service subscription plans Lambda ARN
     Type: String
@@ -109,27 +110,35 @@ Parameters:
   UserServiceGetAll:
     Description: User Service get all users Lambda ARN
     Type: String
+    Default: ''
   UserServiceInsert:
     Description: User Service insert new user Lambda ARN
     Type: String
+    Default: ''
   UserServiceById:
     Description: User Service get user by id Lambda ARN
     Type: String
+    Default: ''
   UserServiceUpdate:
     Description: User Service update user Lambda ARN
     Type: String
+    Default: ''
   UserServiceDelete:
     Description: User Service delete user Lambda ARN
     Type: String
+    Default: ''
   UserServiceEnable:
     Description: User Service enable user Lambda ARN
     Type: String
+    Default: ''
   UserServiceDisable:
     Description: User Service disable user Lambda ARN
     Type: String
+    Default: ''
   UserServiceToken:
     Description: User Service auth token Lambda ARN
     Type: String
+    Default: ''
   AuthMethod:
     Description: Authentication method
     Type: String
@@ -146,6 +155,7 @@ Parameters:
 
 Conditions:
   AuthWithCognitoUserPool: !Equals [!Ref AuthMethod, 'CognitoUserPool']
+  AuthWithOIDC: !Equals [!Ref AuthMethod, 'OIDC']
 
 Resources:
   LambdaAuthorizerExecutionRole:
@@ -1537,36 +1547,42 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/DELETE/tiers/{id}
   UserServiceResource:
     Type: AWS::ApiGateway::Resource
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ParentId: !Ref RootResourceId
       PathPart: 'users'
   UserServiceByIdResource:
     Type: AWS::ApiGateway::Resource
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ParentId: !Ref UserServiceResource
       PathPart: '{id}'
   UserServiceEnableResource:
     Type: AWS::ApiGateway::Resource
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ParentId: !Ref UserServiceByIdResource
       PathPart: 'enable'
   UserServiceDisableResource:
     Type: AWS::ApiGateway::Resource
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ParentId: !Ref UserServiceByIdResource
       PathPart: 'disable'
   UserServiceTokenResource:
     Type: AWS::ApiGateway::Resource
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ParentId: !Ref UserServiceResource
       PathPart: 'token'
   UserServiceGetAllMethod:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceResource
@@ -1585,6 +1601,7 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   UserServiceGetAllLambdaPermission:
     Type: AWS::Lambda::Permission
+    Condition: AuthWithCognitoUserPool
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
@@ -1592,6 +1609,7 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/GET/users
   UserServiceInsertMethod:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceResource
@@ -1610,6 +1628,7 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   UserServiceInsertLambdaPermission:
     Type: AWS::Lambda::Permission
+    Condition: AuthWithCognitoUserPool
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
@@ -1617,6 +1636,7 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/POST/users
   UserServiceResourceCORS:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceResource
@@ -1647,6 +1667,7 @@ Resources:
             method.response.header.X-Requested-With: false
   UserServiceGetByIdMethod:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceByIdResource
@@ -1667,6 +1688,7 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   UserServiceByIdLambdaPermission:
     Type: AWS::Lambda::Permission
+    Condition: AuthWithCognitoUserPool
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
@@ -1674,6 +1696,7 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/GET/users/{id}
   UserServiceUpdateMethod:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceByIdResource
@@ -1694,6 +1717,7 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   UserServiceUpdateLambdaPermission:
     Type: AWS::Lambda::Permission
+    Condition: AuthWithCognitoUserPool
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
@@ -1701,6 +1725,7 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/PUT/users/{id}
   UserServiceDeleteMethod:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceByIdResource
@@ -1721,6 +1746,7 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   UserServiceDeleteLambdaPermission:
     Type: AWS::Lambda::Permission
+    Condition: AuthWithCognitoUserPool
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
@@ -1728,6 +1754,7 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/DELETE/users/{id}
   UserServiceByIdResourceCORS:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceByIdResource
@@ -1758,6 +1785,7 @@ Resources:
             method.response.header.X-Requested-With: false
   UserServiceEnableMethod:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceEnableResource
@@ -1778,6 +1806,7 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   UserServiceEnableLambdaPermission:
     Type: AWS::Lambda::Permission
+    Condition: AuthWithCognitoUserPool
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
@@ -1785,6 +1814,7 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/PATCH/users/{id}/enable
   UserServiceEnableResourceCORS:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceEnableResource
@@ -1815,6 +1845,7 @@ Resources:
             method.response.header.X-Requested-With: false
   UserServiceDisableMethod:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceDisableResource
@@ -1835,6 +1866,7 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   UserServiceDisableLambdaPermission:
     Type: AWS::Lambda::Permission
+    Condition: AuthWithCognitoUserPool
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
@@ -1842,6 +1874,7 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/PATCH/users/{id}/disable
   UserServiceDisableResourceCORS:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceDisableResource
@@ -1872,6 +1905,7 @@ Resources:
             method.response.header.X-Requested-With: false
   UserServiceTokenMethod:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceTokenResource
@@ -1889,6 +1923,7 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   UserServiceTokenLambdaPermission:
     Type: AWS::Lambda::Permission
+    Condition: AuthWithCognitoUserPool
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
@@ -1896,6 +1931,7 @@ Resources:
       SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${PublicApi}/*/POST/users/token
   UserServiceTokenResourceCORS:
     Type: AWS::ApiGateway::Method
+    Condition: AuthWithCognitoUserPool
     Properties:
       RestApiId: !Ref PublicApi
       ResourceId: !Ref UserServiceTokenResource
@@ -1926,8 +1962,9 @@ Resources:
             method.response.header.X-Requested-With: false
   # To Do: Remove deployment from CloudFormation and deal with it either through
   # CodePipeline or a custom resource, or some other external deployment action.
-  ApiDeployment:
+  ApiDeploymentWithUserService:
     Type: AWS::ApiGateway::Deployment
+    Condition: AuthWithCognitoUserPool
     DependsOn:
       - BillingServicePlansResourceCORS
       - BillingServiceGetPlansMethod
@@ -1982,12 +2019,58 @@ Resources:
       #  DataTraceEnabled: true
       #  LoggingLevel: ERROR
       #StageName: !Ref PublicApiStage
+
+  ApiDeploymentWithoutUserService:
+    Type: AWS::ApiGateway::Deployment
+    Condition: AuthWithOIDC
+    DependsOn:
+      - BillingServicePlansResourceCORS
+      - BillingServiceGetPlansMethod
+      - MetricsServiceQueryMethod
+      - MetricsServiceQueryResourceCORS
+      - MetricsServiceDatasetsMethod
+      - MetricsServiceDatasetsResourceCORS
+      - MetricsServiceAlbQueryMethod
+      - MetricsServiceAlbQueryResourceCORS
+      - MetricsServiceAlbQueryByTenantIdMethod
+      - MetricsServiceAlbQueryByTenantIdResourceCORS
+      - OnboardingServiceGetAllMethod
+      - OnboardingServiceStartMethod
+      - OnboardingServiceResourceCORS
+      - OnboardingServiceByIdMethod
+      - OnboardingServiceByIdResourceCORS
+      - SettingsServiceGetAllMethod
+      - SettingsServiceResourceCORS
+      - SettingsServiceOptionsMethod
+      - SettingsServiceOptionsResourceCORS
+      - SettingsServiceGetAppConfigMethod
+      - SettingsServiceUpdateAppConfigMethod
+      - SettingsServiceConfigResourceCORS
+      - SettingsServiceGetByIdMethod
+      - SettingsServiceByIdResourceCORS
+      - TenantServiceGetAllMethod
+      - TenantServiceResourceCORS
+      - TenantServiceGetByIdMethod
+      - TenantServiceUpdateMethod
+      - TenantServiceDeleteMethod
+      - TenantServiceByIdResourceCORS
+      - TenantServiceEnableMethod
+      - TenantServiceEnableResourceCORS
+      - TenantServiceDisableMethod
+      - TenantServiceDisableResourceCORS
+    Properties:
+      RestApiId: !Ref PublicApi
+      #StageDescription:
+      #  DataTraceEnabled: true
+      #  LoggingLevel: ERROR
+      #StageName: !Ref PublicApiStage
+
   ApiStage:
     Type: AWS::ApiGateway::Stage
     Properties:
       RestApiId: !Ref PublicApi
       StageName: !Ref PublicApiStage
-      DeploymentId: !Ref ApiDeployment
+      DeploymentId: !If [ AuthWithCognitoUserPool, !Ref ApiDeploymentWithUserService, !Ref ApiDeploymentWithoutUserService ]
 Outputs:
   PublicApiGatewayEndpoint:
     Description: SaaS Boost Admin PI Gateway Invoke URL

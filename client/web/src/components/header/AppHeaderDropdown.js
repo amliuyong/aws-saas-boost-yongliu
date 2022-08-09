@@ -39,7 +39,6 @@ const AppHeaderDropdown = (props) => {
     user,
   } = props
 
-  console.log('AppHeaderDropdown', user)
   let userName = user?.profile['cognito:username']
   if (!userName) {
     userName = user?.profile?.username

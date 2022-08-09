@@ -17,6 +17,8 @@
 package com.amazon.aws.partners.saasfactory.saasboost;
 
 import com.amazon.aws.partners.saasfactory.saasboost.clients.AwsClientBuilderFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.slf4j.Logger;
@@ -59,6 +61,7 @@ import java.nio.file.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -95,6 +98,8 @@ public class SaaSBoostInstall {
     private String oidcIssuer = "";
     private String oidcPermissions = "";
     private AUTH_METHOD authMethod;
+    private String auth0Audience;
+    private String oidcClientId;
 
     protected enum AUTH_METHOD {
         COGNITO_USER_POOL(1, "Cognito User Pool", "CognitoUserPool"),
@@ -292,6 +297,8 @@ public class SaaSBoostInstall {
             }
         }
 
+        Map<String, String> paramMap = new HashMap<>();
+
         AUTH_METHOD authMethodChoose;
         while (true) {
             System.out.println("Select authentication method: ");
@@ -310,6 +317,7 @@ public class SaaSBoostInstall {
             }
         }
         this.authMethod = authMethodChoose;
+        paramMap.put("authMethod", this.authMethod.value);
 
         String emailAddress = "";
         while (this.authMethod == AUTH_METHOD.COGNITO_USER_POOL) {
@@ -329,10 +337,11 @@ public class SaaSBoostInstall {
         }
 
         while (this.authMethod == AUTH_METHOD.OIDC) {
-            System.out.print("Enter the OIDC issuer:");
+            System.out.print("Enter the OIDC issuer: ");
             String input = Keyboard.readString();
             if (input.startsWith("https://")) {
                 this.oidcIssuer = input;
+                paramMap.put("oidcIssuer", this.oidcIssuer);
                 break;
             } else {
                 outputMessage("Entered value for issuer incorrect or wrong format, please try again.");
@@ -340,10 +349,11 @@ public class SaaSBoostInstall {
         }
 
         while (this.authMethod == AUTH_METHOD.OIDC) {
-            System.out.print("Enter permissions required in token claims (enter 'none' to ignore):");
+            System.out.print("Enter permissions required in token claims (enter 'none' to ignore): ");
             String input = Keyboard.readString();
             if (input.contains("=")) {
                 this.oidcPermissions = input;
+                paramMap.put("oidcPermissions", this.oidcPermissions);
                 break;
             } else if (input.equalsIgnoreCase("none")) {
                 this.oidcPermissions = "";
@@ -352,6 +362,32 @@ public class SaaSBoostInstall {
                 outputMessage("Entered value for permissions incorrect or wrong format, please try again.");
             }
         }
+
+        while (this.authMethod == AUTH_METHOD.OIDC) {
+            System.out.print("Enter client Id: ");
+            String input = Keyboard.readString();
+            if (input.length() > 0) {
+                this.oidcClientId = input;
+                paramMap.put("oidcClientId", this.oidcClientId);
+                break;
+            } else {
+                outputMessage("Entered value for client Id incorrect or wrong format, please try again.");
+            }
+        }
+
+        while (this.oidcIssuer.endsWith("auth0.com")) {
+            System.out.print("Enter auth0 audience: ");
+            String input = Keyboard.readString();
+            if (input.length() > 0) {
+                this.auth0Audience = input;
+                paramMap.put("auth0Audience", this.auth0Audience);
+                break;
+            } else {
+                outputMessage("Entered value for audience incorrect or wrong format, please try again.");
+            }
+        }
+
+        saveInstallerParameters(paramMap);
 
         System.out.print("Would you like to install the metrics and analytics module of AWS SaaS Boost (y or n)? ");
         this.useAnalyticsModule = Keyboard.readBoolean();
@@ -382,7 +418,15 @@ public class SaaSBoostInstall {
         }
         if (this.authMethod == AUTH_METHOD.OIDC) {
             outputMessage("OIDC Issuer: " + this.oidcIssuer);
-            outputMessage("OIDC Permissions: " + this.oidcPermissions);
+            outputMessage("OIDC Client Id: " + this.oidcClientId);
+            if (this.oidcPermissions.length() > 0) {
+                outputMessage("OIDC Permissions: " + this.oidcPermissions);
+            } else {
+                outputMessage("OIDC Permissions: N/A");
+            }
+            if (this.auth0Audience != null) {
+                outputMessage("Auth0 Audience: " + this.auth0Audience);
+            }
         }
         outputMessage("Install optional Analytics Module: " + this.useAnalyticsModule);
         if (this.useAnalyticsModule && isNotBlank(this.quickSightUsername)) {
@@ -487,6 +531,39 @@ public class SaaSBoostInstall {
         outputMessage("AWS SaaS Boost Artifacts Bucket: " + saasBoostArtifactsBucket);
         outputMessage("AWS SaaS Boost Console URL is: " + webUrl);
     }
+
+   private void saveInstallerParameters(Map<String, String> installParam) {
+       final String installerParameterName = "/saas-boost/" + envName + "/INSTALLER";
+       ObjectMapper objectMapper = new ObjectMapper();
+       try {
+           String value = objectMapper.writeValueAsString(installParam);
+           ssm.putParameter(PutParameterRequest.builder()
+                   .name(installerParameterName)
+                   .type(ParameterType.STRING)
+                   .value(value)
+                   .overwrite(true)
+                   .build());
+       } catch (JsonProcessingException e) {
+           System.out.println("Error:" + e.getMessage());
+           throw new RuntimeException(e);
+       }
+   }
+
+   private JsonNode getInstallerParameters() {
+       final String installerParameterName = "/saas-boost/" + envName + "/INSTALLER";
+       ObjectMapper objectMapper = new ObjectMapper();
+       GetParameterResponse response = ssm.getParameter(GetParameterRequest.builder()
+                       .name(installerParameterName)
+                       .withDecryption(false)
+               .build());
+       String paramValueStr = response.parameter().value();
+       try {
+          return objectMapper.readTree(paramValueStr);
+       } catch (JsonProcessingException e) {
+           throw new RuntimeException(e);
+       }
+
+   }
 
     protected void updateSaaSBoost() {
         LOGGER.info("Perform Update of AWS SaaS Boost deployment");
@@ -1565,7 +1642,9 @@ public class SaaSBoostInstall {
         // Note - most params the default is used from the CloudFormation stack
         List<Parameter> templateParameters = new ArrayList<>();
         templateParameters.add(Parameter.builder().parameterKey("Environment").parameterValue(envName).build());
-        templateParameters.add(Parameter.builder().parameterKey("AdminEmailAddress").parameterValue(adminEmail).build());
+        if (adminEmail != null && adminEmail.length() > 0) {
+            templateParameters.add(Parameter.builder().parameterKey("AdminEmailAddress").parameterValue(adminEmail).build());
+        }
         templateParameters.add(Parameter.builder().parameterKey("SaaSBoostBucket").parameterValue(saasBoostArtifactsBucket.getBucketName()).build());
         templateParameters.add(Parameter.builder().parameterKey("Version").parameterValue(VERSION).build());
         templateParameters.add(Parameter.builder().parameterKey("DeployActiveDirectory").parameterValue(useActiveDirectory.toString()).build());
@@ -1871,15 +1950,41 @@ public class SaaSBoostInstall {
 
             Map<String, String> env = pb.environment();
             pb.directory(webDir.toFile());
-            env.put("REACT_APP_SIGNOUT_URI", webUrl);
-            env.put("REACT_APP_CALLBACK_URI", webUrl);
-            env.put("REACT_APP_COGNITO_USERPOOL", exportsMap.get(prefix + "userPoolId"));
-            env.put("REACT_APP_CLIENT_ID", exportsMap.get(prefix + "userPoolClientId"));
-            env.put("REACT_APP_COGNITO_USERPOOL_BASE_URI", exportsMap.get(prefix + "cognitoBaseUri"));
+
+            JsonNode installerParams = getInstallerParameters();
+            String authMethodParam = installerParams.get("authMethod").asText();
+
+            if (AUTH_METHOD.OIDC.value.equals(authMethodParam)) {
+                String oidcIssuerParam = installerParams.get("oidcIssuer").asText();
+                String oidcClientIdParam = installerParams.get("oidcClientId").asText();
+                env.put("REACT_APP_AUTH_ISSUER", oidcIssuerParam);
+                env.put("REACT_APP_CLIENT_ID", oidcClientIdParam);
+
+                String oidcPermissionsParam = null;
+                if (installerParams.has("oidcPermissions")) {
+                    oidcPermissionsParam = installerParams.get("oidcPermissions").asText();
+                }
+                env.put("REACT_APP_AUTH_SCOPE", this.getScope(oidcPermissionsParam));
+                String auth0AudienceParam = null;
+                if (installerParams.has("auth0Audience")) {
+                    auth0AudienceParam = installerParams.get("auth0Audience").asText();
+                    env.put("REACT_APP_OIDC_AUDIENCE", auth0AudienceParam);
+                }
+            } else {
+                String userPoolId = exportsMap.get(prefix + "userPoolId");
+                String cognitoIssuer = String.format("https://cognito-idp.%s.amazonaws.com/%s", AWS_REGION.id(), userPoolId);
+                env.put("REACT_APP_AUTH_ISSUER", cognitoIssuer);
+                env.put("REACT_APP_AUTH_SCOPE", "openid profile email aws.cognito.signin.user.admin");
+                env.put("REACT_APP_CLIENT_ID", exportsMap.get(prefix + "userPoolClientId"));
+            }
+
+            env.put("REACT_APP_AUTH_METHOD", authMethodParam);
             env.put("REACT_APP_API_URI", exportsMap.get(prefix + "publicApiUrl"));
             env.put("REACT_APP_AWS_ACCOUNT", accountId);
             env.put("REACT_APP_ENVIRONMENT", envName);
             env.put("REACT_APP_AWS_REGION", AWS_REGION.id());
+
+            LOGGER.info("ENV: {}", env);
 
             process = pb.start();
             printResults(process);
@@ -1938,6 +2043,34 @@ public class SaaSBoostInstall {
         }
         return webUrl;
     }
+
+   /*
+    get oidc scope from oidcPermissions string
+    e.g. oidcPermissions = "scope=admin openid,groups=admin", returns "admin openid email profile"
+    */
+   private String getScope(String oidcPermissions) {
+       if (oidcPermissions == null) {
+           return "openid email profile";
+       }
+       if (oidcPermissions.contains("scope=")) {
+           for (String itstr : oidcPermissions.split(",")) {
+               if (itstr.strip().startsWith("scope=")) {
+                   String scope = itstr.split("=")[1].strip();
+                   if (!scope.contains("openid")) {
+                       scope += " openid";
+                   }
+                   if (!scope.contains("email")) {
+                       scope += " email";
+                   }
+                   if (!scope.contains("profile")) {
+                       scope += " profile";
+                   }
+                   return scope;
+               }
+           }
+       }
+       return "openid email profile";
+   }
 
     protected static void executeCommand(String command, String[] environment, File dir) {
         LOGGER.info("Executing Commands: " + command);

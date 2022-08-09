@@ -21,8 +21,7 @@ Parameters:
     MinLength: 1
   AdminEmailAddress:
     Description: Email address of admin user to receive temporary password notification
-    AllowedPattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
-    ConstraintDescription: Must be a valid email address.
+    Default: ''
     Type: String
   WebS3Bucket:
     Description: S3 Bucket to host the Admin Console web app
@@ -150,6 +149,7 @@ Resources:
         - http://localhost:3000
   ConsoleUserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
+    Condition: AuthWithCognitoUserPool
     Properties:
       Domain: !Sub sb-${Environment}-saas-boost
       UserPoolId: !Ref ConsoleUserPool

@@ -11,9 +11,10 @@ import {
 } from 'reactstrap'
 import { useAuth } from 'react-oidc-context'
 import { Redirect } from 'react-router-dom'
+import config from '../../config/appConfig'
 export default function OidcSignIn({ signOutReason }) {
   const auth = useAuth()
-
+  console.log("authScope", config.authScope)
   return (
     <Fragment>
       <div className="app d-flex min-vh-100 align-items-center bg-light">
@@ -38,9 +39,7 @@ export default function OidcSignIn({ signOutReason }) {
                             type="button"
                             onClick={() =>
                                auth.signinRedirect({
-                                scope: process.env.REACT_APP_OIDC_SCOPE
-                                  ? process.env.REACT_APP_OIDC_SCOPE
-                                  : 'openid profile email',
+                                scope: config.authScope ? config.authScope : 'openid profile email',
                               })
                             }
                           >

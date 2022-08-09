@@ -30,8 +30,7 @@ Parameters:
   AdminEmailAddress:
     Description: Email address of admin user to receive temporary password notification
     Type: String
-    AllowedPattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
-    ConstraintDescription: Must be a valid email address.
+    Default: ''
   DomainName:
     Description: The domain your workload is hosted at formatted as [env].[domain].[com]
     Type: String
@@ -801,14 +800,14 @@ Resources:
         TierServiceUpdate: !GetAtt tier.Outputs.TierServiceUpdateArn
         TierServiceCreate: !GetAtt tier.Outputs.TierServiceCreateArn
         TierServiceDelete: !GetAtt tier.Outputs.TierServiceDeleteArn
-        UserServiceGetAll: !GetAtt user.Outputs.UserServiceGetAllArn
-        UserServiceInsert: !GetAtt user.Outputs.UserServiceInsertArn
-        UserServiceById: !GetAtt user.Outputs.UserServiceByIdArn
-        UserServiceUpdate: !GetAtt user.Outputs.UserServiceUpdateArn
-        UserServiceDelete: !GetAtt user.Outputs.UserServiceDeleteArn
-        UserServiceEnable: !GetAtt user.Outputs.UserServiceEnableArn
-        UserServiceDisable: !GetAtt user.Outputs.UserServiceDisableArn
-        UserServiceToken: !GetAtt user.Outputs.UserServiceTokenArn
+        UserServiceGetAll: !If [ AuthWithCognitoUserPool, !GetAtt user.Outputs.UserServiceGetAllArn, !Ref AWS::NoValue ]
+        UserServiceInsert: !If [ AuthWithCognitoUserPool, !GetAtt user.Outputs.UserServiceInsertArn, !Ref AWS::NoValue ]
+        UserServiceById: !If [ AuthWithCognitoUserPool, !GetAtt user.Outputs.UserServiceByIdArn, !Ref AWS::NoValue ]
+        UserServiceUpdate: !If [ AuthWithCognitoUserPool, !GetAtt user.Outputs.UserServiceUpdateArn, !Ref AWS::NoValue ]
+        UserServiceDelete: !If [ AuthWithCognitoUserPool, !GetAtt user.Outputs.UserServiceDeleteArn, !Ref AWS::NoValue ]
+        UserServiceEnable: !If [ AuthWithCognitoUserPool, !GetAtt user.Outputs.UserServiceEnableArn, !Ref AWS::NoValue ]
+        UserServiceDisable: !If [ AuthWithCognitoUserPool, !GetAtt user.Outputs.UserServiceDisableArn, !Ref AWS::NoValue ]
+        UserServiceToken: !If [ AuthWithCognitoUserPool, !GetAtt user.Outputs.UserServiceTokenArn, !Ref AWS::NoValue ]
         AuthMethod: !Ref AuthMethod
         OIDCIssuer: !Ref OIDCIssuer
         OIDCPermissions: !Ref OIDCPermissions
