@@ -32,9 +32,17 @@ Parameters:
     AllowedValues:
       - CognitoUserPool
       - OIDC
+  DomainName:
+    Description: Domain Name
+    Type: String
+    Default: ''
 
 Conditions:
   AuthWithCognitoUserPool: !Equals [!Ref AuthMethod, 'CognitoUserPool']
+  IsCNRegion: !Or
+    - !Equals [ !Sub '${AWS::Region}', 'cn-north-1' ]
+    - !Equals [ !Sub '${AWS::Region}', 'cn-northwest-1' ]
+  HasDomainName: !Not [ !Equals [!Ref DomainName, ''] ]
 
 Resources:
   ConsoleOriginAccessIdentity:
@@ -51,6 +59,11 @@ Resources:
         Enabled: true
         IPV6Enabled: false
         HttpVersion: http2
+        Aliases:
+          - 'Fn::If':
+              - HasDomainName
+              - !Ref DomainName
+              - !Ref AWS::NoValue
         Origins:
           - DomainName: !Sub ${WebS3Bucket}.s3.${AWS::Region}.${AWS::URLSuffix}
             Id: !Sub sb-${Environment}-s3-website
@@ -77,10 +90,25 @@ Resources:
           TargetOriginId: !Sub sb-${Environment}-s3-website
           ViewerProtocolPolicy: redirect-to-https
           Compress: true
+          ForwardedValues:
+            'Fn::If':
+              - IsCNRegion
+              - QueryString: true
+                Cookies:
+                  Forward: none
+              - !Ref AWS::NoValue
           # CachingOptimized managed cache policy
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          CachePolicyId:
+            'Fn::If':
+              - IsCNRegion
+              - !Ref AWS::NoValue
+              - 658327ea-f89d-4fab-a63d-7e88639e58f6
           # CORS-S3Origin managed origin request policy
-          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+          OriginRequestPolicyId:
+            'Fn::If':
+              - IsCNRegion
+              - !Ref AWS::NoValue
+              - 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
           # CORS-with-preflight-and-SecurityHeadersPolicy managed response headers policy
           ResponseHeadersPolicyId: eaab4381-ed33-4a86-88ca-d9558dc6cd63
         ViewerCertificate:
@@ -250,6 +278,9 @@ Outputs:
   CloudFrontDistributionUrl:
     Description: Saas Boost Cloudfront distribution URL
     Value: !Sub https://${ConsoleCloudFrontDistribution.DomainName}
+  WebUrl:
+    Description: Saas Boost Cloudfront distribution URL
+    Value: !If [ HasDomainName, !Sub "https://${DomainName}", !Sub "https://${ConsoleCloudFrontDistribution.DomainName}" ]
     Export:
       Name: !Sub saas-boost::${Environment}-${AWS::Region}:webUrl
   CognitoSignOnBaseUri:

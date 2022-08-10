@@ -62,7 +62,7 @@ public class ApiGatewayHelper {
             .httpClient(HTTP_CLIENT)
             .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
             .region(Region.of(AWS_REGION))
-            .endpointOverride(URI.create("https://" + StsClient.SERVICE_NAME + "." + Region.of(AWS_REGION).toString() + ".amazonaws.com"))
+            .endpointOverride(URI.create("https://" + StsClient.SERVICE_NAME + "." + Region.of(AWS_REGION).id() + "." + Utils.getUrlSuffix(AWS_REGION)))
             .overrideConfiguration(ClientOverrideConfiguration.builder()
                     .retryPolicy(RetryPolicy.builder()
                             .backoffStrategy(BackoffStrategy.defaultStrategy())

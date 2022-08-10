@@ -139,6 +139,16 @@ public class Utils {
         return json;
     }
 
+    public static boolean isCnRegion(String region) {
+        return region.startsWith("cn-");
+    }
+    public static String getUrlSuffix(String region) {
+        if (isCnRegion(region)) {
+            return "amazonaws.com.cn";
+        }
+        return "amazonaws.com";
+    }
+
     public static <T> TreeNode toJsonTree(T convertibleObject) {
         return MAPPER.valueToTree(convertibleObject);
     }
@@ -173,12 +183,17 @@ public class Utils {
 
     public static <B extends AwsSyncClientBuilder<B, C> & AwsClientBuilder<?, C>, C> C sdkClient(AwsSyncClientBuilder<B, C> builder, String service) {
         Region signingRegion = Region.of(System.getenv("AWS_REGION"));
-        String endpoint = "https://" + service + "." + signingRegion.toString() + ".amazonaws.com";
+        String urlSuffix = getUrlSuffix(signingRegion.id());
+        String endpoint = "https://" + service + "." + signingRegion.id() + "." + urlSuffix;
         // Route53 doesn't follow the rules...
         if ("route53".equals(service)) {
-            signingRegion = Region.AWS_GLOBAL;
-            endpoint = "https://route53.amazonaws.com";
+            if (!isCnRegion(signingRegion.id())) {
+                signingRegion = Region.AWS_GLOBAL;
+            }
+            endpoint = "https://route53." + urlSuffix;
         }
+        LOGGER.info("endpoint:" + endpoint);
+
         C client = builder
                 .httpClientBuilder(UrlConnectionHttpClient.builder())
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
@@ -197,6 +212,7 @@ public class Utils {
                 .build();
         return client;
     }
+
 
     public static void publishEvent(EventBridgeClient eventBridge, String eventBus, String source, String detailType,
                                     Map<String, Object> detail) {

@@ -72,6 +72,7 @@ public class SaaSBoostInstall {
     private static final String OS = System.getProperty("os.name").toLowerCase();
     private static final String VERSION = getVersionInfo();
 
+    public static final boolean isCnRegion = AWS_REGION.id().startsWith("cn-");
     private final AwsClientBuilderFactory awsClientBuilderFactory;
     private final ApiGatewayClient apigw;
     private final CloudFormationClient cfn;
@@ -100,6 +101,14 @@ public class SaaSBoostInstall {
     private AUTH_METHOD authMethod;
     private String auth0Audience;
     private String oidcClientId;
+    private String domainName;
+
+    public static String getAwsPartition() {
+        if (isCnRegion) {
+            return "aws-cn";
+        }
+        return "aws";
+    }
 
     protected enum AUTH_METHOD {
         COGNITO_USER_POOL(1, "Cognito User Pool", "CognitoUserPool"),
@@ -254,14 +263,19 @@ public class SaaSBoostInstall {
                 updateWebApp();
                 break;
             case ADD_ANALYTICS:
-                this.useAnalyticsModule = true;
-                System.out.print("Would you like to setup Amazon Quicksight for the Analytics module? You must have already registered for Quicksight in your account (y or n)? ");
-                this.useQuickSight = Keyboard.readBoolean();
-                if (this.useQuickSight) {
-                    getQuickSightUsername();
+                if (isCnRegion) {
+                    System.out.print("Analytics Module is not available in China regions.");
+                    break;
+                } else {
+                    this.useAnalyticsModule = true;
+                    System.out.print("Would you like to setup Amazon Quicksight for the Analytics module? You must have already registered for Quicksight in your account (y or n)? ");
+                    this.useQuickSight = Keyboard.readBoolean();
+                    if (this.useQuickSight) {
+                        getQuickSightUsername();
+                    }
+                    installAnalyticsModule();
+                    break;
                 }
-                installAnalyticsModule();
-                break;
             case DELETE:
                 deleteSaasBoostInstallation();
                 break;
@@ -296,11 +310,10 @@ public class SaaSBoostInstall {
                 outputMessage("Entered value is incorrect, maximum of 10 alphanumeric characters, please try again.");
             }
         }
-
         Map<String, String> paramMap = new HashMap<>();
 
-        AUTH_METHOD authMethodChoose;
-        while (true) {
+        AUTH_METHOD authMethodChoose =  AUTH_METHOD.OIDC;
+        while (!isCnRegion) {
             System.out.println("Select authentication method: ");
             for (AUTH_METHOD authMethod : AUTH_METHOD.values()) {
                 System.out.println(authMethod.getPrompt());
@@ -317,6 +330,7 @@ public class SaaSBoostInstall {
             }
         }
         this.authMethod = authMethodChoose;
+
         paramMap.put("authMethod", this.authMethod.value);
 
         String emailAddress = "";
@@ -387,10 +401,29 @@ public class SaaSBoostInstall {
             }
         }
 
+        while(isCnRegion) {
+            // must configure domain name in China regions
+            System.out.print("Enter domain name (enter 'skip' to configure it manually): ");
+            String input = Keyboard.readString();
+            if (input.equalsIgnoreCase("skip")) {
+                break;
+            }
+            if (input.indexOf(".") > 0  && !input.startsWith("https://") && !input.startsWith("http://")) {
+                this.domainName = input;
+                break;
+            } else {
+                outputMessage("Entered value for domain incorrect or wrong format, please try again.");
+            }
+        }
+
         saveInstallerParameters(paramMap);
 
-        System.out.print("Would you like to install the metrics and analytics module of AWS SaaS Boost (y or n)? ");
-        this.useAnalyticsModule = Keyboard.readBoolean();
+        if (isCnRegion) {
+            this.useAnalyticsModule = false;
+        } else {
+            System.out.print("Would you like to install the metrics and analytics module of AWS SaaS Boost (y or n)? ");
+            this.useAnalyticsModule = Keyboard.readBoolean();
+        }
 
         // If installing the analytics module, ask about QuickSight.
         if (useAnalyticsModule) {
@@ -428,6 +461,11 @@ public class SaaSBoostInstall {
                 outputMessage("Auth0 Audience: " + this.auth0Audience);
             }
         }
+
+        if (this.domainName != null) {
+            outputMessage("Domain Name: " + this.domainName);
+        }
+
         outputMessage("Install optional Analytics Module: " + this.useAnalyticsModule);
         if (this.useAnalyticsModule && isNotBlank(this.quickSightUsername)) {
             outputMessage("Amazon QuickSight user for Analytics Module: " + this.quickSightUsername);
@@ -1645,6 +1683,9 @@ public class SaaSBoostInstall {
         templateParameters.add(Parameter.builder().parameterKey("Environment").parameterValue(envName).build());
         if (adminEmail != null && adminEmail.length() > 0) {
             templateParameters.add(Parameter.builder().parameterKey("AdminEmailAddress").parameterValue(adminEmail).build());
+        }
+        if (this.domainName !=null && this.domainName.length() > 0) {
+            templateParameters.add(Parameter.builder().parameterKey("DomainName").parameterValue(this.domainName).build());
         }
         templateParameters.add(Parameter.builder().parameterKey("SaaSBoostBucket").parameterValue(saasBoostArtifactsBucket.getBucketName()).build());
         templateParameters.add(Parameter.builder().parameterKey("Version").parameterValue(VERSION).build());

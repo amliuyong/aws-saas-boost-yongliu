@@ -92,12 +92,11 @@ public class OnboardingService {
         this.ecr = Utils.sdkClient(EcrClient.builder(), EcrClient.SERVICE_NAME);
         this.s3 = Utils.sdkClient(S3Client.builder(), S3Client.SERVICE_NAME);
         try {
+            String AWS_REGION = System.getenv("AWS_REGION");
             this.presigner = S3Presigner.builder()
                     .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                     .region(Region.of(System.getenv("AWS_REGION")))
-                    .endpointOverride(new URI("https://" + s3.serviceName() + "."
-                            + Region.of(System.getenv("AWS_REGION"))
-                            + ".amazonaws.com")
+                    .endpointOverride(new URI("https://" + s3.serviceName() + "." + Region.of(AWS_REGION).id() + "." + Utils.getUrlSuffix(AWS_REGION))
                     ) // will break in China regions
                     .build();
         } catch (URISyntaxException e) {
@@ -580,7 +579,7 @@ public class OnboardingService {
                 // Now run the onboarding stack to provision the infrastructure for this tenant
                 LOGGER.info("OnboardingService::provisionTenant create stack " + stackName);
                 String templateUrl = "https://" + SAAS_BOOST_BUCKET + ".s3." + AWS_REGION
-                        + ".amazonaws.com/tenant-onboarding.yaml";
+                        + "." + Utils.getUrlSuffix(AWS_REGION) + "/tenant-onboarding.yaml";
                 String stackId;
                 try {
                     CreateStackResponse cfnResponse = cfn.createStack(CreateStackRequest.builder()
@@ -1005,7 +1004,7 @@ public class OnboardingService {
                         // Now run the onboarding stack to provision the infrastructure for this application service
                         LOGGER.info("OnboardingService::provisionApplication create stack " + stackName);
                         String templateUrl = "https://" + SAAS_BOOST_BUCKET + ".s3." + AWS_REGION
-                                + ".amazonaws.com/tenant-onboarding-app.yaml";
+                                + "." + Utils.getUrlSuffix(AWS_REGION) + "/tenant-onboarding-app.yaml";
                         String stackId;
                         try {
                             CreateStackResponse cfnResponse = cfn.createStack(CreateStackRequest.builder()
@@ -1574,7 +1573,8 @@ public class OnboardingService {
             // not part of the onboarding request data nor is it part of the tenant data.
             Map<String, Object> settings = fetchSettingsForTenantUpdate(context);
             final String lambdaSourceFolder = (String) settings.get("SAAS_BOOST_LAMBDAS_FOLDER");
-            final String templateUrl = "https://" + settings.get("SAAS_BOOST_BUCKET") + ".s3.amazonaws.com/" + settings.get("ONBOARDING_TEMPLATE");
+            final String templateUrl = "https://" + settings.get("SAAS_BOOST_BUCKET") + ".s3."
+                    + AWS_REGION + "." + Utils.getUrlSuffix(AWS_REGION) +  "/" + settings.get("ONBOARDING_TEMPLATE");
 
             List<Parameter> templateParameters = new ArrayList<>();
             templateParameters.add(Parameter.builder().parameterKey("TenantId").usePreviousValue(Boolean.TRUE).build());

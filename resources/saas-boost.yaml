@@ -590,14 +590,14 @@ Resources:
   network:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-network.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-network.yaml
       Parameters:
         Environment: !Ref Environment
   ad:
     Type: AWS::CloudFormation::Stack
     Condition: ProvisionManagedAD
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-managed-ad.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-managed-ad.yaml
       Parameters:
         Environment: !Ref Environment
         Subnets:
@@ -614,19 +614,20 @@ Resources:
     # delete the bucket
     DependsOn: InvokeClearLoggingBucket
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-web.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-web.yaml
       Parameters:
         Environment: !Ref Environment
         AdminEmailAddress: !Ref AdminEmailAddress
         WebS3Bucket: !Ref AdminWeb
         AuthMethod: !Ref AuthMethod
+        DomainName: !Ref DomainName
   core:
     Type: AWS::CloudFormation::Stack
     DependsOn:
       - network
       - ApplicationServicesMacro
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-core.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-core.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -647,7 +648,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: core
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-svc-billing.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-svc-billing.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -658,7 +659,7 @@ Resources:
   metering:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-metering-billing.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-metering-billing.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -676,7 +677,7 @@ Resources:
       - InvokeClearAthenaBucket
       - InvokeClearAccessLogsBucket
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-svc-metrics.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-svc-metrics.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -690,7 +691,7 @@ Resources:
   onboarding:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-svc-onboarding.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-svc-onboarding.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -706,7 +707,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: core
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-svc-quota.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-svc-quota.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -716,7 +717,7 @@ Resources:
   settings:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-svc-settings.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-svc-settings.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -730,7 +731,7 @@ Resources:
   tenant:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-svc-tenant.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-svc-tenant.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -742,7 +743,7 @@ Resources:
   tier:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-svc-tier.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-svc-tier.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -755,7 +756,7 @@ Resources:
     DependsOn:
       - core
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-svc-user.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-svc-user.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -765,7 +766,7 @@ Resources:
   publicapi:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-public-api.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-public-api.yaml
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Ref SaaSBoostBucket
@@ -815,7 +816,7 @@ Resources:
   privateapi:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::URLSuffix}/saas-boost-private-api.yaml
+      TemplateURL: !Sub https://${SaaSBoostBucket}.s3.${AWS::Region}.${AWS::URLSuffix}/saas-boost-private-api.yaml
       Parameters:
         Environment: !Ref Environment
         PrivateApi: !GetAtt core.Outputs.SaaSBoostPrivateApi

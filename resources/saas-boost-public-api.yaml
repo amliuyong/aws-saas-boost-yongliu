@@ -229,7 +229,7 @@ Resources:
       AuthorizerResultTtlInSeconds: '300'
       AuthorizerUri: !Join
         - ''
-        - - 'arn:aws:apigateway:'
+        - - !Sub 'arn:${AWS::Partition}:apigateway:'
           - !Ref 'AWS::Region'
           - ':lambda:path/2015-03-31/functions/'
           - !GetAtt
