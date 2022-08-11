@@ -48,8 +48,16 @@ if [ -z "$ECR_REPO" ]; then
     echo "Something went wrong: can't get ECR repo from Parameter Store. Exiting."
     exit 1
 fi
-DOCKER_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO"
+
+URL_SUFFIX="amazonaws.com"
+
+if [[ $AWS_REGION =~ cn-.* ]]; then
+  URL_SUFFIX="amazonaws.com.cn"
+fi
+DOCKER_REPO="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.$URL_SUFFIX/$ECR_REPO"
 DOCKER_TAG="$DOCKER_REPO:latest"
+
+echo $DOCKER_TAG
 
 AWS_CLI_VERSION=$(aws --version 2>&1 | awk -F / '{print $2}' | cut -c 1)
 if [ $AWS_CLI_VERSION = '1' ]; then
