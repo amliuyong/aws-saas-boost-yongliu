@@ -101,7 +101,7 @@ public class SaaSBoostInstall {
     private AUTH_METHOD authMethod;
     private String auth0Audience;
     private String oidcClientId;
-    private String domainName;
+    private String consoleDomainName;
 
     public static String getAwsPartition() {
         if (isCnRegion) {
@@ -403,13 +403,11 @@ public class SaaSBoostInstall {
 
         while(isCnRegion) {
             // must configure domain name in China regions
-            System.out.print("Enter domain name (enter 'skip' to configure it manually): ");
+            System.out.print("Enter admin console domain name: ");
             String input = Keyboard.readString();
-            if (input.equalsIgnoreCase("skip")) {
-                break;
-            }
             if (input.indexOf(".") > 0  && !input.startsWith("https://") && !input.startsWith("http://")) {
-                this.domainName = input;
+                this.consoleDomainName = input;
+                paramMap.put("consoleDomainName", this.consoleDomainName);
                 break;
             } else {
                 outputMessage("Entered value for domain incorrect or wrong format, please try again.");
@@ -462,8 +460,8 @@ public class SaaSBoostInstall {
             }
         }
 
-        if (this.domainName != null) {
-            outputMessage("Domain Name: " + this.domainName);
+        if (this.consoleDomainName != null) {
+            outputMessage("Admin Console Domain Name: " + this.consoleDomainName);
         }
 
         outputMessage("Install optional Analytics Module: " + this.useAnalyticsModule);
@@ -1684,8 +1682,8 @@ public class SaaSBoostInstall {
         if (adminEmail != null && adminEmail.length() > 0) {
             templateParameters.add(Parameter.builder().parameterKey("AdminEmailAddress").parameterValue(adminEmail).build());
         }
-        if (this.domainName !=null && this.domainName.length() > 0) {
-            templateParameters.add(Parameter.builder().parameterKey("DomainName").parameterValue(this.domainName).build());
+        if (this.consoleDomainName !=null && this.consoleDomainName.length() > 0) {
+            templateParameters.add(Parameter.builder().parameterKey("ConsoleDomainName").parameterValue(this.consoleDomainName).build());
         }
         templateParameters.add(Parameter.builder().parameterKey("SaaSBoostBucket").parameterValue(saasBoostArtifactsBucket.getBucketName()).build());
         templateParameters.add(Parameter.builder().parameterKey("Version").parameterValue(VERSION).build());

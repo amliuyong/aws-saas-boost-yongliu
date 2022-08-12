@@ -964,7 +964,9 @@ public class OnboardingService {
                         templateParameters.add(Parameter.builder().parameterKey("EncryptEFS").parameterValue(encryptFilesystem.toString()).build());
                         templateParameters.add(Parameter.builder().parameterKey("EFSLifecyclePolicy").parameterValue(filesystemLifecycle).build());
                         templateParameters.add(Parameter.builder().parameterKey("UseFSx").parameterValue(enableFSx.toString()).build());
-                        templateParameters.add(Parameter.builder().parameterKey("FSxFileSystemType").parameterValue(fileSystemType.toString()).build());
+                        if (fileSystemType.equals("FSX_ONTAP") || fileSystemType.equals("FSX_WINDOWS")) { // AllowedValues FSX_WINDOWS, FSX_ONTAP
+                            templateParameters.add(Parameter.builder().parameterKey("FSxFileSystemType").parameterValue(fileSystemType.toString()).build());
+                        }
                         templateParameters.add(Parameter.builder().parameterKey("FSxWindowsMountDrive").parameterValue(fsxWindowsMountDrive).build());
                         templateParameters.add(Parameter.builder().parameterKey("FSxDailyBackupTime").parameterValue(fsxDailyBackupTime).build());
                         templateParameters.add(Parameter.builder().parameterKey("FSxBackupRetention").parameterValue(fsxBackupRetentionDays.toString()).build());
@@ -1785,7 +1787,11 @@ public class OnboardingService {
                             Parameter.builder().parameterKey("DomainName").parameterValue(domainName).build(),
                             Parameter.builder().parameterKey("HostedZone").parameterValue(hostedZone).build(),
                             Parameter.builder().parameterKey("ApplicationServices").parameterValue(
-                                    String.join(",", services.keySet())).build()
+                                    String.join(",", services.keySet())).build(),
+                            Parameter.builder().parameterKey("AuthMethod").usePreviousValue(Boolean.TRUE).build(),
+                            Parameter.builder().parameterKey("OIDCIssuer").usePreviousValue(Boolean.TRUE).build(),
+                            Parameter.builder().parameterKey("OIDCPermissions").usePreviousValue(Boolean.TRUE).build(),
+                            Parameter.builder().parameterKey("ConsoleDomainName").usePreviousValue(Boolean.TRUE).build()
                     )
                     .build()
             );

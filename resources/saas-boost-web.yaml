@@ -32,8 +32,9 @@ Parameters:
     AllowedValues:
       - CognitoUserPool
       - OIDC
-  DomainName:
-    Description: Domain Name
+  ConsoleDomainName:
+    # ConsoleDomainName must be set in China regions
+    Description: Admin Console Domain Name
     Type: String
     Default: ''
 
@@ -42,7 +43,7 @@ Conditions:
   IsCNRegion: !Or
     - !Equals [ !Sub '${AWS::Region}', 'cn-north-1' ]
     - !Equals [ !Sub '${AWS::Region}', 'cn-northwest-1' ]
-  HasDomainName: !Not [ !Equals [!Ref DomainName, ''] ]
+  HasConsoleDomainName: !Not [ !Equals [!Ref ConsoleDomainName, ''] ]
 
 Resources:
   ConsoleOriginAccessIdentity:
@@ -61,8 +62,8 @@ Resources:
         HttpVersion: http2
         Aliases:
           - 'Fn::If':
-              - HasDomainName
-              - !Ref DomainName
+              - HasConsoleDomainName
+              - !Ref ConsoleDomainName
               - !Ref AWS::NoValue
         Origins:
           - DomainName: !Sub ${WebS3Bucket}.s3.${AWS::Region}.${AWS::URLSuffix}
@@ -280,7 +281,7 @@ Outputs:
     Value: !Sub https://${ConsoleCloudFrontDistribution.DomainName}
   WebUrl:
     Description: Saas Boost Cloudfront distribution URL
-    Value: !If [ HasDomainName, !Sub "https://${DomainName}", !Sub "https://${ConsoleCloudFrontDistribution.DomainName}" ]
+    Value: !If [ HasConsoleDomainName, !Sub "https://${ConsoleDomainName}", !Sub "https://${ConsoleCloudFrontDistribution.DomainName}" ]
     Export:
       Name: !Sub saas-boost::${Environment}-${AWS::Region}:webUrl
   CognitoSignOnBaseUri:

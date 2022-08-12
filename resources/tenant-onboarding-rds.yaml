@@ -155,7 +155,7 @@ Resources:
             Condition:
               StringEquals:
                 kms:CallerAccount: !Ref 'AWS::AccountId'
-                kms:ViaService: !Sub rds.${AWS::Region}.${AWS::URLSuffix}
+                kms:ViaService: !Sub rds.${AWS::Region}.amazonaws.com
       Tags:
         - Key: Name
           Value:
@@ -311,7 +311,7 @@ Resources:
                 Condition:
                   StringEquals:
                     kms:ViaService:
-                      - !Sub ssm.${AWS::Region}.${AWS::URLSuffix}
+                      - !Sub ssm.${AWS::Region}.amazonaws.com
   RDSBootstrapDatabaseLogs:
     Type: AWS::Logs::LogGroup
     Condition: BootstrapDatabase

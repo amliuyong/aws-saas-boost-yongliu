@@ -131,7 +131,7 @@ Resources:
             Resource: '*'
             Condition:
               StringEquals:
-                kms:ViaService: !Sub fsx.${AWS::Region}.${AWS::URLSuffix}
+                kms:ViaService: !Sub fsx.${AWS::Region}.amazonaws.com
                 kms:CallerAccount: !Ref 'AWS::AccountId'
       Tags:
         - Key: Name

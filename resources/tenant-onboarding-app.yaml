@@ -802,8 +802,8 @@ Resources:
         UserData:
           Fn::If:
           - ProvisionFSx
-          - Fn::Base64:
-            !Sub |
+          - Fn::Base64: !Sub
+            - |
               <powershell>
               Start-Transcript -Path "C:\UserData.log" -Append
               Write-Output ("Download and install the CloudWatch agent")
@@ -874,8 +874,8 @@ Resources:
                   - IsCNRegion
                   - 'https://s3.cn-north-1.amazonaws.com.cn/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi'
                   - !Sub 'https://s3.${AWS::Region}.${AWS::URLSuffix}/amazoncloudwatch-agent-${AWS::Region}/windows/amd64/latest/amazon-cloudwatch-agent.msi'
-          - Fn::Base64:
-            !Sub |
+          - Fn::Base64: !Sub
+            - |
               <powershell>
               Start-Transcript -Path "C:\UserData.log" -Append
               Write-Output ("Download and install the CloudWatch agent")
@@ -1164,7 +1164,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: ProvisionFSx
     Properties:
-      TemplateURL: !Sub 'https://{{resolve:ssm:/saas-boost/${Environment}/SAAS_BOOST_BUCKET}}.s3.${AWS::URLSuffix}/tenant-onboarding-fsx.yaml'
+      TemplateURL: !Sub 'https://{{resolve:ssm:/saas-boost/${Environment}/SAAS_BOOST_BUCKET}}.s3.${AWS::Region}.${AWS::URLSuffix}/tenant-onboarding-fsx.yaml'
       Parameters:
         Environment: !Ref Environment
         TenantId: !Ref TenantId
@@ -1187,7 +1187,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: ProvisionEFS
     Properties:
-      TemplateURL: !Sub 'https://{{resolve:ssm:/saas-boost/${Environment}/SAAS_BOOST_BUCKET}}.s3.${AWS::URLSuffix}/tenant-onboarding-efs.yaml'
+      TemplateURL: !Sub 'https://{{resolve:ssm:/saas-boost/${Environment}/SAAS_BOOST_BUCKET}}.s3.${AWS::Region}.${AWS::URLSuffix}/tenant-onboarding-efs.yaml'
       Parameters:
         Environment: !Ref Environment
         TenantId: !Ref TenantId
@@ -1202,7 +1202,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: ProvisionRDS
     Properties:
-      TemplateURL: !Sub 'https://{{resolve:ssm:/saas-boost/${Environment}/SAAS_BOOST_BUCKET}}.s3.${AWS::URLSuffix}/tenant-onboarding-rds.yaml'
+      TemplateURL: !Sub 'https://{{resolve:ssm:/saas-boost/${Environment}/SAAS_BOOST_BUCKET}}.s3.${AWS::Region}.${AWS::URLSuffix}/tenant-onboarding-rds.yaml'
       Parameters:
         Environment: !Ref Environment
         SaaSBoostBucket: !Sub '{{resolve:ssm:/saas-boost/${Environment}/SAAS_BOOST_BUCKET}}'

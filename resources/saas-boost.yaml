@@ -77,6 +77,10 @@ Parameters:
     Description: OIDC Permissions, required claims in token, e.g, scope=saas-boost-api:admin
     Type: String
     Default: ''
+  ConsoleDomainName:
+    Description: The admin console domain name
+    Type: String
+    Default: ''
 
 Conditions:
   ProvisionManagedAD: !Equals [!Ref DeployActiveDirectory, 'true']
@@ -620,7 +624,7 @@ Resources:
         AdminEmailAddress: !Ref AdminEmailAddress
         WebS3Bucket: !Ref AdminWeb
         AuthMethod: !Ref AuthMethod
-        DomainName: !Ref DomainName
+        ConsoleDomainName: !Ref ConsoleDomainName
   core:
     Type: AWS::CloudFormation::Stack
     DependsOn:

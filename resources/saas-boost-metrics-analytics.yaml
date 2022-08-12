@@ -565,7 +565,7 @@ Resources:
                       - ''
                       - - s3.
                         - !Ref 'AWS::Region'
-                        - !Sub .${AWS::URLSuffix}
+                        - .amazonaws.com
                   StringLike:
                     kms:EncryptionContext:aws:s3:arn: !Join
                       - ''
