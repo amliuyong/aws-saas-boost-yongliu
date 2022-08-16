@@ -106,10 +106,13 @@ export const DashboardComponent = (props) => {
   const awsAccount = globalConfig.awsAccount
   const awsRegion = globalConfig.region
 
-  const fileAwsConsoleLink = `https://${awsRegion}.console.aws.amazon.com/efs/home?region=${awsRegion}#file-systems`
-  const rdsAwsConsoleLink = `https://${awsRegion}.console.aws.amazon.com/rds/home?region=${awsRegion}#databases:`
-  const ecrAwsConsoleLink = `https://${awsRegion}.console.aws.amazon.com/ecr/repositories`
-  const s3BucketLink = `https://s3.console.aws.amazon.com/s3/buckets/${s3Bucket?.value}`
+  const consoleUrlSuffix = awsRegion.startsWith("cn-")? "amazonaws.cn": "aws.amazon.com"
+  const serviceUrlSuffix = awsRegion.startsWith("cn-")? "amazonaws.cn": "amazon.com"
+
+  const fileAwsConsoleLink = `https://${awsRegion}.console.${consoleUrlSuffix}/efs/home?region=${awsRegion}#file-systems`
+  const rdsAwsConsoleLink = `https://${awsRegion}.console.${consoleUrlSuffix}/rds/home?region=${awsRegion}#databases:`
+  const ecrAwsConsoleLink = `https://${awsRegion}.console.${consoleUrlSuffix}/ecr/repositories`
+  const s3BucketLink = `https://s3.console.${consoleUrlSuffix}/s3/buckets/${s3Bucket?.value}`
 
   useEffect(() => {
     const fetchTenants = dispatch(fetchTenantsThunk())
@@ -263,7 +266,7 @@ export const DashboardComponent = (props) => {
                                 </ECRInstructions>
                               </dt>
                               <dd className="mb-3">
-                                {awsAccount}.dkr.ecr.{awsRegion}.amazonaws.com
+                                {awsAccount}.dkr.ecr.{awsRegion}.{serviceUrlSuffix}
                                 {service.containerRepo
                                   ? `/${service.containerRepo}`
                                   : ''}

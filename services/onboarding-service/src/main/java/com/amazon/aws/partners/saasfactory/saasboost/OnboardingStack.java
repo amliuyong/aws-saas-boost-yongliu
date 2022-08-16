@@ -97,8 +97,9 @@ public class OnboardingStack {
             String[] stackId = arn.split(":");
             if (stackId.length > 4) {
                 String region = stackId[3];
+                String consoleUrlSuffix = region.startsWith("cn-")?  "amazonaws.cn": "aws.amazon.com";
                 url = String.format(
-                        "https://%s.console.aws.amazon.com/cloudformation/home?region=%s#/stacks/stackinfo?filteringText=&filteringStatus=active&viewNested=true&hideStacks=false&stackId=%s",
+                        "https://%s.console." + consoleUrlSuffix + "/cloudformation/home?region=%s#/stacks/stackinfo?filteringText=&filteringStatus=active&viewNested=true&hideStacks=false&stackId=%s",
                         region,
                         region,
                         arn

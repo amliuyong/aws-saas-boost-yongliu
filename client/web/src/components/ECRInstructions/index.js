@@ -33,6 +33,8 @@ export default function ECRInstructions(props) {
     toggleShowModal((s) => !s)
   }
 
+  const serviceUrlSuffix = awsRegion.startsWith("cn-")? "amazonaws.cn": "amazon.com"
+
   return (
     <>
       <a href="#" onClick={toggleShowModal}>
@@ -62,7 +64,7 @@ export default function ECRInstructions(props) {
                 <div className="text-monospace bg-gray-200 mt-3 mb-3 p-2">
                   aws ecr get-login-password --region {awsRegion} | docker login
                   --username AWS --password-stdin {awsAccount}.dkr.ecr.
-                  {awsRegion}.amazonaws.com
+                  {awsRegion}.{serviceUrlSuffix}
                 </div>
                 <div className="text-muted">
                   Note: If you receive an error using the AWS CLI, make sure
@@ -84,7 +86,7 @@ export default function ECRInstructions(props) {
                 image to this repository:{' '}
                 <div className="text-monospace bg-gray-200 mt-3 mb-3 p-2">
                   docker tag saas-boost:latest {awsAccount}.dkr.ecr.{awsRegion}
-                  .amazonaws.com/
+                  .{serviceUrlSuffix}/
                   {ecrRepo}:latest
                 </div>
               </li>
@@ -92,7 +94,7 @@ export default function ECRInstructions(props) {
                 Run the following command to push this image to your newly
                 created AWS repository:{' '}
                 <div className="text-monospace bg-gray-200 mt-3 mb-3 p-2">
-                  docker push {awsAccount}.dkr.ecr.{awsRegion}.amazonaws.com/
+                  docker push {awsAccount}.dkr.ecr.{awsRegion}.{serviceUrlSuffix}/
                   {ecrRepo}:latest
                 </div>
               </li>
