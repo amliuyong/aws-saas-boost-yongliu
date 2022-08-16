@@ -21,17 +21,15 @@ You must have a domain name which is under the ICP(Internet Content Provider).
 
 5. Enter **Client ID**, such as `aws-saas-boost-web-client`, Choose **Save**.
 
-6. Choose **Save**.
+6. Choose **User** in left panel.
 
-7. Choose **User** in left panel.
+7. Choose **Add user**.
 
-8. Choose **Add user**.
+8. Enter **Username**, such as `sb-admin`, enter an **Email**,  Choose **Save**.
 
-9. Enter **Username**, such as `sb-admin`, enter an **Email**,  Choose **Save**.
+9. Choose **Credentials** tab, set password for the user.
 
-10. Choose **Credentials** tab, set password for the user.
-
-11. Follow the [installation instructions](./install-using-cloud9.md) to install AWS SaaS Boost with below parameters:
+10. Follow the [installation instructions](./install-using-cloud9.md) to install AWS SaaS Boost with below parameters:
    
 | Parameter                            | Value                                                       | Comment                                                        |
 |--------------------------------------|-------------------------------------------------------------|----------------------------------------------------------------|
@@ -40,9 +38,9 @@ You must have a domain name which is under the ICP(Internet Content Provider).
 | permissions required in token claims | none                                                        | set `none` to ignore                                           |
 | admin console domain name            | `<your console domian name>`                                | saas boost console domain name, only required in China regions |
 
-12. Update **Valid Redirect URIs** and **Web Origins** to your AWS saas boost web URL in Keycloak.
+11. Update **Valid Redirect URIs** and **Web Origins** to your AWS saas boost web URL in Keycloak.
 
-13. Login AWS saas boost console with the user created in Keycloak, such as `sb-admin`.
+12. Login AWS saas boost console with the user created in Keycloak, such as `sb-admin`.
 
 
 ### Auth0
