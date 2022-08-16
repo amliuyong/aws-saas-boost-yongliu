@@ -33,12 +33,12 @@ You must have a domain name which is under the ICP(Internet Content Provider).
 
 11. Follow the [installation instructions](./install-using-cloud9.md) to install AWS SaaS Boost with below parameters:
    
-| Parameter                            | Value                                                       | Comment                                        |
-|--------------------------------------|-------------------------------------------------------------|------------------------------------------------|
-| OIDC issuer                          | `https://<keycloak domain>/auth/realms/aws-saas-boost-auth` | please replace `<keycloak domain>`             |
-| client Id                            | aws-saas-boost-web-client                                   | the Client ID                                  |
-| permissions required in token claims | none                                                        | set `none` to ignore                           |
-| admin console domain name            | `<your console domian name>`                                | please use your saas boost console domain name |
+| Parameter                            | Value                                                       | Comment                                                        |
+|--------------------------------------|-------------------------------------------------------------|----------------------------------------------------------------|
+| OIDC issuer                          | `https://<keycloak domain>/auth/realms/aws-saas-boost-auth` | please replace `<keycloak domain>`                             |
+| client Id                            | aws-saas-boost-web-client                                   | the Client ID                                                  |
+| permissions required in token claims | none                                                        | set `none` to ignore                                           |
+| admin console domain name            | `<your console domian name>`                                | saas boost console domain name, only required in China regions |
 
 12. Update **Valid Redirect URIs** and **Web Origins** to your AWS saas boost web URL in Keycloak.
 
@@ -77,13 +77,13 @@ You must have a domain name which is under the ICP(Internet Content Provider).
 
 15. Follow the [installation instructions](./install-using-cloud9.md) to install AWS SaaS Boost with below parameters:
 
-| Parameter                            | Value                        | Comment                                               |
-|--------------------------------------|------------------------------|-------------------------------------------------------|
-| OIDC issuer                          | `https://<domain>`           | replace <domain> as the **Domain** recorded in step 5 |
-| client Id                            | `<client_id>`                | the **Client ID**  recorded in step 5                 |
-| permissions required in token claims | none                         | set `none` to ignore                                  |
-| auth0 audience                       | `aws-saas-boost-api`         | the  **Identifier** in step 7                         |
-| admin console domain name            | `<your console domian name>` | please use your saas boost console domain name        |
+| Parameter                            | Value                        | Comment                                                        |
+|--------------------------------------|------------------------------|----------------------------------------------------------------|
+| OIDC issuer                          | `https://<domain>`           | replace <domain> as the **Domain** recorded in step 5          |
+| client Id                            | `<client_id>`                | the **Client ID**  recorded in step 5                          |
+| permissions required in token claims | none                         | set `none` to ignore                                           |
+| auth0 audience                       | `aws-saas-boost-api`         | the  **Identifier** in step 7                                  |
+| admin console domain name            | `<your console domian name>` | saas boost console domain name, only required in China regions |
 
 16. Update **Allowed Callback URLs** and **Allowed Web Origins** to your AWS saas boost web URL in application `aws-saas-boost-app` settings.
 
@@ -111,12 +111,12 @@ You must have a domain name which is under the ICP(Internet Content Provider).
 
 10. Follow the [installation instructions](./install-using-cloud9.md) to install AWS SaaS Boost with below parameters:
 
-| Parameter                            | Value                        | Comment                                        |
-|--------------------------------------|------------------------------|------------------------------------------------|
-| OIDC issuer                          | `<Issuer>`                   | the **Issuer** recorded in step 6              |
-| client Id                            | `<App ID>`                   | the **App ID**  recorded in step 6             |
-| permissions required in token claims | none                         | set `none` to ignore                           |
-| admin console domain name            | `<your console domian name>` | please use your saas boost console domain name |
+| Parameter                            | Value                        | Comment                                                        |
+|--------------------------------------|------------------------------|----------------------------------------------------------------|
+| OIDC issuer                          | `<Issuer>`                   | the **Issuer** recorded in step 6                              |
+| client Id                            | `<App ID>`                   | the **App ID**  recorded in step 6                             |
+| permissions required in token claims | none                         | set `none` to ignore                                           |
+| admin console domain name            | `<your console domian name>` | saas boost console domain name, only required in China regions |
 
 11. Update **Login Callback URL**, **Logout Callback URL** and **Initiate login URL** to your AWS saas boost web URL in application `aws-saas-boost-app` settings.
 
@@ -126,23 +126,24 @@ You must have a domain name which is under the ICP(Internet Content Provider).
 ## (Optional) Permissions settings (advance configuration)
 
 You can set **permissions required in token claims** to do permission control based on scope or groups,  the format is `key1=value1,key2=value2,...`. 
-e.g. if it is set to `scope=aws-saas-boost-admin`, only the user with below claims can log in the console
+
+e.g. if it is set to `scope=aws-saas-boost-admin`, only the user with below claims can log in the console, note: scopes `openid profile email` are default scopes.
 
 ```json
 {
-  ...
-  "scope": "openid profile email aws-saas-boost-admin",
-  ...
+
+  "scope": "openid profile email aws-saas-boost-admin"
+
 }
 ```
 
-e.g. if it set to `groups=aws-saas-boost-admin`, only the user with below claims can log in the console
+e.g. if it is set to `groups=aws-saas-boost-admin`, only the user with below claims can log in the console
 
 ```json
 {
-  ...
-  "groups": ["aws-saas-boost-admin"],
-  ...
+
+  "groups": ["aws-saas-boost-admin"]
+
 }
 ```
 Each IdP has its own configuration about roles and permissions, please refer to their documents.
