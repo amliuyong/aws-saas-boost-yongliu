@@ -1,4 +1,4 @@
-# Instructions for configuring AWS SaaS Boost using OIDC.
+# Instructions for configuring AWS SaaS Boost using OIDC
 
 AWS SaaS Boost supports third party OAuth 2.0/OpenID IdPs for authentication and authorization beside Cognito User Pool, such as Keycloak, Okta, Auth0, Authing.
 This document gives the quick instructions how to configure AWS SaaS Boost authentication with third party OAuth 2.0/OpenID IdPs.
