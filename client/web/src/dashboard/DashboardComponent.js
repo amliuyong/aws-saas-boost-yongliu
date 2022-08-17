@@ -105,9 +105,10 @@ export const DashboardComponent = (props) => {
 
   const awsAccount = globalConfig.awsAccount
   const awsRegion = globalConfig.region
+  const isCnRegion = awsRegion.startsWith("cn-")
 
-  const consoleUrlSuffix = awsRegion.startsWith("cn-")? "amazonaws.cn": "aws.amazon.com"
-  const serviceUrlSuffix = awsRegion.startsWith("cn-")? "amazonaws.cn": "amazon.com"
+  const consoleUrlSuffix = isCnRegion? "amazonaws.cn": "aws.amazon.com"
+  const serviceUrlSuffix = isCnRegion? "amazonaws.cn": "amazon.com"
 
   const fileAwsConsoleLink = `https://${awsRegion}.console.${consoleUrlSuffix}/efs/home?region=${awsRegion}#file-systems`
   const rdsAwsConsoleLink = `https://${awsRegion}.console.${consoleUrlSuffix}/rds/home?region=${awsRegion}#databases:`
@@ -241,7 +242,7 @@ export const DashboardComponent = (props) => {
                                   href={
                                     ecrAwsConsoleLink +
                                     (service.containerRepo
-                                      ? `/private/${awsAccount}/` +
+                                      ? (isCnRegion ? '/' : `/private/${awsAccount}/`) +
                                         service.containerRepo
                                       : '')
                                   }
