@@ -187,7 +187,9 @@ public class Utils {
         String endpoint = "https://" + service + "." + signingRegion.id() + "." + urlSuffix;
         // Route53 doesn't follow the rules...
         if ("route53".equals(service)) {
-            if (!isCnRegion(signingRegion.id())) {
+            if (isCnRegion(signingRegion.id())) {
+                signingRegion = Region.AWS_CN_GLOBAL;
+            } else {
                 signingRegion = Region.AWS_GLOBAL;
             }
             endpoint = "https://route53." + urlSuffix;

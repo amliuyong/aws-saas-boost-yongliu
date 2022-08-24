@@ -123,24 +123,33 @@ public class RdsOptions implements RequestHandler<Map<String, Object>, Object> {
                                     );
                                 } catch (RdsException rdsException) {
                                     LOGGER.error("rds:DescribeOrderableDBInstanceOptions error {}", rdsException.getMessage());
-                                    String stackTrace = Utils.getFullStackTrace(rdsException);
-                                    LOGGER.error(stackTrace);
-                                    responseData.put("Reason", stackTrace);
-                                    sendResponse(event, "FAILED", responseData);
-                                }
-                                LOGGER.info("{} {} {} has {} orderable instance options", AWS_REGION, engine.getEngine(), dbVersion.engineVersion(), orderableResponse.orderableDBInstanceOptions().size());
-                                marker = orderableResponse.marker();
-
-                                for (OrderableDBInstanceOption option : orderableResponse.orderableDBInstanceOptions()) {
-                                    RdsInstance validInstance = RdsInstance.ofInstanceClass(option.dbInstanceClass());
-                                    if (validInstance != null) {
-                                        LOGGER.info("found {} instance option for {} {} ({})", validInstance, engine, dbVersion.engineVersion(), AWS_REGION);
-                                        Map<String, String> instanceDetails = new HashMap<>();
-                                        instanceDetails.put("class", validInstance.getInstanceClass());
-                                        instanceDetails.put("description", validInstance.getDescription());
-                                        instanceMap.put(validInstance, instanceDetails);
+                                    if (rdsException.getMessage().contains("Cannot find version")) {
+                                        // in China region: cn-northwest-1, get below error
+                                        // Cannot find version 5.7.mysql_aurora.2.07.1 for aurora-mysql
+                                        LOGGER.warn("skip error");
+                                        marker = null;
                                     } else {
-                                        LOGGER.info("skipping option that doesn't match enum of instance types: {}", option);
+                                        String stackTrace = Utils.getFullStackTrace(rdsException);
+                                        LOGGER.error(stackTrace);
+                                        responseData.put("Reason", stackTrace);
+                                        sendResponse(event, "FAILED", responseData);
+                                    }
+                                }
+                                if (orderableResponse != null) {
+                                    LOGGER.info("{} {} {} has {} orderable instance options", AWS_REGION, engine.getEngine(), dbVersion.engineVersion(), orderableResponse.orderableDBInstanceOptions().size());
+                                    marker = orderableResponse.marker();
+
+                                    for (OrderableDBInstanceOption option : orderableResponse.orderableDBInstanceOptions()) {
+                                        RdsInstance validInstance = RdsInstance.ofInstanceClass(option.dbInstanceClass());
+                                        if (validInstance != null) {
+                                            LOGGER.info("found {} instance option for {} {} ({})", validInstance, engine, dbVersion.engineVersion(), AWS_REGION);
+                                            Map<String, String> instanceDetails = new HashMap<>();
+                                            instanceDetails.put("class", validInstance.getInstanceClass());
+                                            instanceDetails.put("description", validInstance.getDescription());
+                                            instanceMap.put(validInstance, instanceDetails);
+                                        } else {
+                                            LOGGER.info("skipping option that doesn't match enum of instance types: {}", option);
+                                        }
                                     }
                                 }
                                 requestNumber++;
