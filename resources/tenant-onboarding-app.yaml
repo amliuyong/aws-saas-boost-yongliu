@@ -497,13 +497,13 @@ Resources:
                   Value: !Ref EventBus
                 - Name: METRICS_STREAM
                   Value: !Ref MetricsStream
-                - Name: DB_HOST
+                - Name: WORDPRESS_DATABASE_HOST
                   Value: !GetAtt rds.Outputs.RdsEndpoint
                 - Name: DB_PORT
                   Value: !Ref RDSPort
-                - Name: DB_NAME
+                - Name: WORDPRESS_DATABASE_NAME
                   Value: !Ref RDSDatabase
-                - Name: DB_USER
+                - Name: WORDPRESS_DATABASE_USER
                   Value: !Ref RDSUsername
               - - Name: AWS_REGION
                   Value: !Ref AWS::Region
@@ -538,7 +538,7 @@ Resources:
           Secrets:
             Fn::If:
               - ProvisionRDS
-              - - Name: DB_PASSWORD
+              - - Name: WORDPRESS_DATABASE_PASSWORD
                   ValueFrom: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${RDSPasswordParam}
               - !Ref 'AWS::NoValue'
   CodePipeline:
@@ -992,10 +992,10 @@ Resources:
     Properties:
       HealthCheckProtocol: HTTP
       HealthCheckPath: !Ref ContainerHealthCheckPath
-      HealthCheckIntervalSeconds: 15
-      HealthCheckTimeoutSeconds: 10
+      HealthCheckIntervalSeconds: 300
+      HealthCheckTimeoutSeconds: 120
       HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 5
+      UnhealthyThresholdCount: 10
       Port: !Ref ContainerPort
       Protocol: HTTP
       TargetType: !If [WindowsOS, instance, ip]
