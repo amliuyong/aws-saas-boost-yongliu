@@ -442,10 +442,12 @@ Resources:
               - kms:CreateKey
             Resource:
               - '*'
-  OnboardingServiceComputeProvisionPolicy:
+  # split OnboardingServiceComputeProvisionPolicy into part1 and part2
+  # As quota for PolicySize: 6144 in China region cn-northwest-1
+  OnboardingServiceComputeProvisionPolicyPart1:
     Type: AWS::IAM::ManagedPolicy
     Properties:
-      Description: Onboarding Service policy for tenant environment compute provisioning
+      Description: Onboarding Service policy for tenant environment compute provisioning part1
       Path: '/'
       PolicyDocument:
         Version: 2012-10-17
@@ -571,6 +573,15 @@ Resources:
               - iam:RemoveRoleFromInstanceProfile
             Resource:
               - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/sb-${Environment}-tenant*
+
+  OnboardingServiceComputeProvisionPolicyPart2:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Onboarding Service policy for tenant environment compute provisioning part2
+      Path: '/'
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
           - Effect: Allow
             Action:
               - ecs:PutClusterCapacityProviders
@@ -635,6 +646,7 @@ Resources:
               - ec2:RunInstances
             Resource:
               - '*'
+
   OnboardingServiceDatabaseProvisionPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -828,7 +840,8 @@ Resources:
       ManagedPolicyArns:
         - !Ref OnboardingServiceBasePolicy
         - !Ref OnboardingServiceTenantProvisionPolicy
-        - !Ref OnboardingServiceComputeProvisionPolicy
+        - !Ref OnboardingServiceComputeProvisionPolicyPart1
+        - !Ref OnboardingServiceComputeProvisionPolicyPart2
         - !Ref OnboardingServiceDatabaseProvisionPolicy
         - !Ref OnboardingServiceStorageProvisionPolicy
   OnboardingServiceGetAllLogs:
